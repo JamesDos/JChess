@@ -1,0 +1,27 @@
+:root {
+  --white-color: #f0d9b5;
+  --black-color: #b58863;
+  
+}
+
+.tile-container {
+  position: relative;
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.tile--label {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  align-self: flex-end;
+}
+
+.black {
+  background-color: var(--black-color)
+}
+
+.white {
+  background-color: var(--white-color);
+}
