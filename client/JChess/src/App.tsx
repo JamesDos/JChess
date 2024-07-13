@@ -1,6 +1,8 @@
 
 import './App.css';
-import {Board} from "./components/board/board";
+import {Board} from "./components/chessboard/board";
+
+
 
 function App() {
 

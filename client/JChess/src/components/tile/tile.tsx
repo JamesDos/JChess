@@ -1,5 +1,5 @@
 import "./tile.css";
-import { ROWS, COLS } from "../board/board";
+import { ROWS, COLS, Piece, PieceType, Color} from "../types"
 
 const convertPosToCoords = (i: number, j: number) => {
   const rank = ROWS - i
@@ -8,19 +8,26 @@ const convertPosToCoords = (i: number, j: number) => {
   return [file, rank]
 }
 
+
 export interface TileProps {
-  isWhite: boolean
+  color: Color
   row: number
   col: number
+  pieceImage: string
 }
 
 export const Tile = (props: TileProps) => {
-  const classNameString = `tile-container ${props.isWhite ? "white": "black"} ${props.row} ${props.col}`
+  const tileColor = props.color.toLowerCase()
+  const classNameString = `tile-container ${tileColor} ${props.row} ${props.col}`
   const [file, rank] = convertPosToCoords(props.row, props.col)
-  
+
   return (
     <div className={classNameString}>
-      <div className="tile--label">{file}{rank}</div>
+      {props.pieceImage && <img className="piece" src={props.pieceImage} alt="piece" />}
+      {rank === 1 && 
+      <div className={`tile--label-file ${tileColor}`}>{file}</div>}
+      {file === "h" && 
+      <div className= {`tile--label-rank ${tileColor}`}>{rank}</div>}
     </div>
   )
 }
