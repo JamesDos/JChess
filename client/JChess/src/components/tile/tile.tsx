@@ -1,5 +1,6 @@
 import "./tile.css";
 import { ROWS, COLS, Piece, PieceType, Color} from "../types"
+import Draggable from "react-draggable";
 
 const convertPosToCoords = (i: number, j: number) => {
   const rank = ROWS - i
@@ -18,12 +19,16 @@ export interface TileProps {
 
 export const Tile = (props: TileProps) => {
   const tileColor = props.color.toLowerCase()
-  const classNameString = `tile-container ${tileColor} ${props.row} ${props.col}`
+  const classNameString = `tile-container ${tileColor}`
   const [file, rank] = convertPosToCoords(props.row, props.col)
 
   return (
     <div className={classNameString}>
-      {props.pieceImage && <img className="piece" src={props.pieceImage} alt="piece" />}
+        { props.pieceImage && 
+          <Draggable>
+              <div style={{backgroundImage: `url(${props.pieceImage})`}} className="piece"></div>
+          </Draggable>
+          }
       {rank === 1 && 
       <div className={`tile--label-file ${tileColor}`}>{file}</div>}
       {file === "h" && 

@@ -1,6 +1,6 @@
 import {ROWS, COLS, Color, Piece, PieceType} from "../types";
 
-const assetPath = "../../assets/images";
+const assetPath = "../../../assets/images";
 
 const blackPawns = []
 const whitePawns = []

@@ -46,4 +46,14 @@
 .piece {
   width: 80%;
   height: 80%;
+  background: no-repeat;
+  background-size: 100%;
+}
+
+.piece:hover {
+  cursor: grab;
+}
+
+.piece:active {
+  cursor: grabbing;
 }
