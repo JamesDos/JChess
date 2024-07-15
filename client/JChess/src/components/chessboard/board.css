@@ -1,25 +1,7 @@
-@property --rows {
-  initial-value: 8;
-}
 
-@property --cols {
-  initial-value: 8;
-}
-
-.board-container {
-  display: grid;
-  grid-template-rows: repeat(8, 1fr);
-  grid-template-columns: repeat(8, 1fr);
-  height: 800px;
-  width: 800px;
-  border-radius: 6px;
-}
-
-.board-row {
-  display: flex;
-}
 
 .board {
-  height: 800px;
-  width: 800px;
+  height: 650px;
+  width: 650px;
+  grid-column: 2 / 2;
 }

@@ -1,0 +1,33 @@
+:root {
+  --light-grey: #302e2c;
+  --hover-blue: #3792e8;
+  --selected-blue: #283947;
+}
+
+.move-display--rowitem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 8px;
+}
+
+.move-display--rowitem--turn {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  background-color: var(--light-grey);
+}
+
+.move-display--rowitem--move {
+  flex: 2;
+  padding-left: 16px;
+}
+
+.move-display--rowitem--move:hover {
+  background-color: var(--hover-blue);
+}
+
+.selected {
+  background-color: var(--selected-blue);
+}
+
