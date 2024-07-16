@@ -3,13 +3,14 @@
   --hover-blue: #3792e8;
   --selected-blue: #283947;
   --hover-green: #5d8d25;
+  --display-background: #262422;
 }
 
 .move-display-container {
   display: flex;
   flex-direction: column;
   height: 200px;
-  border: 5px solid red;
+  background-color: var(--display-background);
   overflow: scroll;
 }
 
