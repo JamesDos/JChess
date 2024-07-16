@@ -25,8 +25,7 @@ const App = () => {
   const [playPromoteSound] = useSound(promoteSound)
   const [playCheckSound] = useSound(checkSound)
 
-  const onDrop = (sourceSquare: string, targetSquare: string) => {
-
+  const makeMove = (sourceSquare: string, targetSquare: string) => {
     try {
       const move = chess.move({
         from: sourceSquare,
@@ -42,7 +41,7 @@ const App = () => {
         console.log(error)
         console.log("Illegal Move!")
     }
-  };
+  }
 
   const playMoveAudio = (move) => {
     if (chess.inCheck()) {
@@ -73,25 +72,8 @@ const App = () => {
     setDraggable(pos === position)
   }
 
-  const getGameHistory = () => {
-    const rowItemList = []
-    for (let i = 0; i < gameHistory.length; i++) {
-      const move = gameHistory[i]
-      if (i % 2 == 0) { // white move
-        rowItemList.push({
-          turn: move.before.split(" ").slice(-1),
-          white: move.san,
-          black: "",
-          afterWhiteMovePos: move.after,
-          afterBlackMovePos: ""
-        })
-      } else { // black move
-        const latestMove = rowItemList[rowItemList.length - 1]
-        latestMove.black = move.san
-        latestMove.afterBlackMovePos = move.after
-      }
-    }
-    return rowItemList
+  const getPossibleMoves = (square: Square) => {
+    return chess.moves({square: square, verbose: true}).map(move => move.to)
   }
 
   return (
@@ -99,8 +81,9 @@ const App = () => {
       <Board 
         position={position}
         displayPosition={displayPosition}
-        onDrop={onDrop}
+        makeMove={makeMove}
         draggable={draggable}
+        getPossibleMoves={getPossibleMoves}
       />
       <MoveDisplay
         history={gameHistory}
