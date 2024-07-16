@@ -50,8 +50,6 @@ const App = () => {
       return;
     }
     const flag = move.flags
-    console.log(flag)
-    console.log("here")
     switch (flag) {
       case "c":
       case "pc":
