@@ -4,10 +4,18 @@ import { Chessboard } from 'react-chessboard';
 import { Chess, SQUARES, Square} from 'chess.js';
 import "./board.css";
 
-export const Board = (props) => {
+export interface BoardProps {
+  position: string,
+  displayPosition: string,
+  makeMove: (sourceSquare: string, targetSquare: string) => void,
+  draggable: boolean,
+  getPossibleMoves: (square: Square) => Square[],
+}
 
-  const [selectedSquare, setSelectedSquare] = useState(null)
-  const [dottedSquares, setDottedSquares] = useState([])
+export const Board = (props: BoardProps) => {
+
+  const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
+  const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
 
   const onDrop = (sourceSquare: Square, targetSquare: Square) => {
     if (dottedSquares.includes(targetSquare)) {
@@ -17,7 +25,7 @@ export const Board = (props) => {
     }
   }
 
-  const onSquareClick = (sqaure) => {
+  const onSquareClick = (sqaure: Square) => {
     if (dottedSquares.includes(sqaure)) {
       props.makeMove(selectedSquare, sqaure)
       setSelectedSquare(null)
@@ -27,7 +35,7 @@ export const Board = (props) => {
     }
   }
 
-  const updateHighlightedSquares = (sqaure) => {
+  const updateHighlightedSquares = (sqaure: Square) => {
     setSelectedSquare(sqaure)
     setDottedSquares(props.getPossibleMoves(sqaure))
   }

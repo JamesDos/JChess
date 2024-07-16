@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSound } from "use-sound"
 import {Board} from "./components/chessboard/board";
 import { MoveDisplay } from './components/moveDisplay/moveDisplay';
-import { Chess, Square} from 'chess.js';
+import { Chess, Square, Move} from 'chess.js';
 import './App.css';
 
 import moveSound from "./assets/audio/move-self.mp3";
@@ -39,11 +39,10 @@ const App = () => {
       playMoveAudio(move)
     } catch (error) {
         console.log(error)
-        console.log("Illegal Move!")
     }
   }
 
-  const playMoveAudio = (move) => {
+  const playMoveAudio = (move: Move) => {
     if (chess.inCheck()) {
       playCheckSound()
       return;

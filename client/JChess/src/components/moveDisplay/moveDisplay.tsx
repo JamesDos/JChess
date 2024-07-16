@@ -3,12 +3,20 @@ import back1 from "../../assets/images/back1.png";
 import backFull from "../../assets/images/backFull.png";
 import forward1 from "../../assets/images/forward1.png";
 import forwardFull from "../../assets/images/forwardFull.png";
+import { Move } from "chess.js"
 
 import "./moveDisplay.css";
 
-export const MoveDisplay = (props) => {
+export interface MoveDisplayProps {
+  history: Move[],
+  setBoard: (pos: string) => void,
+  selectedMoveNum: number,
+  setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>
+}
 
-  const handleClickMove = (pos, halfMoveCount: number) => {
+export const MoveDisplay = (props: MoveDisplayProps) => {
+
+  const handleClickMove = (pos: string, halfMoveCount: number) => {
     props.setBoard(pos)
     props.setSelectedMoveNum(halfMoveCount)
   }
