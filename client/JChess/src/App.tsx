@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { useSound } from "use-sound"
 import {Board} from "./components/chessboard/board";
 import { MoveDisplay } from './components/moveDisplay/moveDisplay';
@@ -11,6 +11,10 @@ import castleSound from "./assets/audio/castle.mp3";
 import promoteSound from "./assets/audio/promote.mp3";
 import checkSound from "./assets/audio/move-check.mp3";
 
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000')
+
 const App = () => {
   const [chess] = useState(new Chess());
   const [displayPosition, setDisplayPosition] = useState('start')
@@ -18,6 +22,9 @@ const App = () => {
   const [position, setPosition] = useState('start'); // fen string representation of position
   const [gameHistory, setGameHistory] = useState(chess.history({verbose: true}))
   const [moveCount, setMoveCount] = useState(1)
+  const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
+  const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
+
   // sound effects
   const [playMoveSound] = useSound(moveSound)
   const [playCaptureSound] = useSound(captureSound)
@@ -25,7 +32,14 @@ const App = () => {
   const [playPromoteSound] = useSound(promoteSound)
   const [playCheckSound] = useSound(checkSound)
 
-  const makeMove = (sourceSquare: string, targetSquare: string) => {
+  useEffect(() => {
+    socket.on("newMove", (move) => {
+      console.log(`newMove is ${move}`)
+    })
+  }, [socket])
+
+
+  const handleMakeMove = (sourceSquare: string, targetSquare: string) => {
     try {
       const move = chess.move({
         from: sourceSquare,
@@ -37,6 +51,7 @@ const App = () => {
       setDisplayPosition(chess.fen())
       setMoveCount(chess.history().length)
       playMoveAudio(move)
+      socket.emit("move", move)
     } catch (error) {
         console.log(error)
     }
@@ -66,7 +81,7 @@ const App = () => {
     }
   }
 
-  const setBoardToPos = (pos: string) => {
+  const handleSetBoardToPos = (pos: string) => {
     setDisplayPosition(pos)
     setDraggable(pos === position)
   }
@@ -75,20 +90,64 @@ const App = () => {
     return chess.moves({square: square, verbose: true}).map(move => move.to)
   }
 
+  const handleDropPiece = (sourceSquare: Square, targetSquare: Square) => {
+    if (dottedSquares.includes(targetSquare)) {
+      handleMakeMove(sourceSquare, targetSquare)
+      setSelectedSquare(null)
+      setDottedSquares([sourceSquare, targetSquare])
+    }
+  }
+
+  const handleSquareClick = (sqaure: Square) => {
+    if (dottedSquares.includes(sqaure)) {
+      handleMakeMove(selectedSquare, sqaure)
+      setSelectedSquare(null)
+      setDottedSquares([selectedSquare, sqaure])
+    } else {
+      updateHighlightedSquares(sqaure)
+    }
+  }
+
+  const updateHighlightedSquares = (sqaure: Square) => {
+    setSelectedSquare(sqaure)
+    setDottedSquares(getPossibleMoves(sqaure))
+  }
+
+  const resetHighlightedSquares = () => {
+    setSelectedSquare(null)
+    setDottedSquares([])
+  }
+
+  const determineSquareStyles = () => {
+    const styles = {}
+    if (selectedSquare) {
+      styles[selectedSquare] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
+    }
+    dottedSquares.forEach(square => {
+      styles[square] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
+    })
+    return styles
+  }
+
   return (
     <div className="app">
       <Board 
         position={position}
         displayPosition={displayPosition}
-        makeMove={makeMove}
+        makeMove={handleMakeMove}
         draggable={draggable}
-        getPossibleMoves={getPossibleMoves}
+        showPossibleMoves={getPossibleMoves}
+        onDrop={handleDropPiece}
+        onSquareClick={handleSquareClick}
+        setSquareStyles={determineSquareStyles}
+        onPieceDragBegin={(piece, square) => updateHighlightedSquares(square)}
       />
       <MoveDisplay
         history={gameHistory}
-        setBoard={setBoardToPos}
+        setBoard={handleSetBoardToPos}
         selectedMoveNum={moveCount}
         setSelectedMoveNum={setMoveCount}
+        resetSquares={resetHighlightedSquares}
         />
     </div>
   )

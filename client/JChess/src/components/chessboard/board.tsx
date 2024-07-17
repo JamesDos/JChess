@@ -9,58 +9,64 @@ export interface BoardProps {
   displayPosition: string,
   makeMove: (sourceSquare: string, targetSquare: string) => void,
   draggable: boolean,
-  getPossibleMoves: (square: Square) => Square[],
+  showPossibleMoves: (square: Square) => Square[],
+  onDrop: (sourceSquare: Square, targetSquare: Square) => void,
+  onSquareClick: (sqaure: Square) => void,
+  setSquareStyles: () => {},
+  onPieceDragBegin: (piece: any, square: any) => void
 }
 
 export const Board = (props: BoardProps) => {
 
-  const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
-  const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
+  // TODO: Potentially Migrate ChessBoard Component to App
 
-  const onDrop = (sourceSquare: Square, targetSquare: Square) => {
-    if (dottedSquares.includes(targetSquare)) {
-      props.makeMove(sourceSquare, targetSquare)
-      setSelectedSquare(null)
-      setDottedSquares([sourceSquare, targetSquare])
-    }
-  }
+  // const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
+  // const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
 
-  const onSquareClick = (sqaure: Square) => {
-    if (dottedSquares.includes(sqaure)) {
-      props.makeMove(selectedSquare, sqaure)
-      setSelectedSquare(null)
-      setDottedSquares([selectedSquare, sqaure])
-    } else {
-      updateHighlightedSquares(sqaure)
-    }
-  }
+  // const onDrop = (sourceSquare: Square, targetSquare: Square) => {
+  //   if (dottedSquares.includes(targetSquare)) {
+  //     props.makeMove(sourceSquare, targetSquare)
+  //     setSelectedSquare(null)
+  //     setDottedSquares([sourceSquare, targetSquare])
+  //   }
+  // }
 
-  const updateHighlightedSquares = (sqaure: Square) => {
-    setSelectedSquare(sqaure)
-    setDottedSquares(props.getPossibleMoves(sqaure))
-  }
+  // const onSquareClick = (sqaure: Square) => {
+  //   if (dottedSquares.includes(sqaure)) {
+  //     props.makeMove(selectedSquare, sqaure)
+  //     setSelectedSquare(null)
+  //     setDottedSquares([selectedSquare, sqaure])
+  //   } else {
+  //     updateHighlightedSquares(sqaure)
+  //   }
+  // }
 
-  const determineSquareStyles = () => {
-    const styles = {}
-    if (selectedSquare) {
-      styles[selectedSquare] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
-    }
-    dottedSquares.forEach(square => {
-      styles[square] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
-    })
-    return styles
-  }
+  // const updateHighlightedSquares = (sqaure: Square) => {
+  //   setSelectedSquare(sqaure)
+  //   setDottedSquares(props.getPossibleMoves(sqaure))
+  // }
+
+  // const determineSquareStyles = () => {
+  //   const styles = {}
+  //   if (selectedSquare) {
+  //     styles[selectedSquare] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
+  //   }
+  //   dottedSquares.forEach(square => {
+  //     styles[square] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
+  //   })
+  //   return styles
+  // }
 
   return (
     <div className="board">
       <Chessboard
         position={props.draggable ? props.position : props.displayPosition}
-        onPieceDrop={onDrop} 
+        onPieceDrop={props.onDrop} 
         arePiecesDraggable={props.draggable}
         onPieceClick={props.showPossibleMoves}
-        onSquareClick={onSquareClick}
-        customSquareStyles={determineSquareStyles()}
-        onPieceDragBegin={(piece, square) => updateHighlightedSquares(square)}
+        onSquareClick={props.onSquareClick}
+        customSquareStyles={props.setSquareStyles()}
+        onPieceDragBegin={props.onPieceDragBegin}
         />
     </div>
   );

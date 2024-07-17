@@ -11,7 +11,8 @@ export interface MoveDisplayProps {
   history: Move[],
   setBoard: (pos: string) => void,
   selectedMoveNum: number,
-  setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>
+  setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>,
+  resetSquares: () => void
 }
 
 export const MoveDisplay = (props: MoveDisplayProps) => {
@@ -19,6 +20,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   const handleClickMove = (pos: string, halfMoveCount: number) => {
     props.setBoard(pos)
     props.setSelectedMoveNum(halfMoveCount)
+    props.resetSquares()
   }
 
   const moveForwardOne = () => {
@@ -27,6 +29,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
       // selectedMoveNum - 1 === index of position in history
       // Thus, index of next move === selectedMoveNum
       props.setBoard(props.history[props.selectedMoveNum].after)
+      props.resetSquares()
     }
   }
 
@@ -34,6 +37,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     if (props.selectedMoveNum < props.history.length) {
       props.setSelectedMoveNum(props.history.length)
       props.setBoard(props.history[props.history.length - 1].after)
+      props.resetSquares()
     }
   }
 
@@ -41,6 +45,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     if (props.selectedMoveNum > 1) {
       props.setSelectedMoveNum(prevNum => prevNum - 1)
       props.setBoard(props.history[props.selectedMoveNum - 2].after)
+      props.resetSquares()
     }
   }
 
@@ -48,6 +53,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     if (props.selectedMoveNum > 1) {
       props.setSelectedMoveNum(1)
       props.setBoard(props.history[0].after)
+      props.resetSquares()
     }
 
   }
