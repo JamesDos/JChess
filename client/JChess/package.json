@@ -16,13 +16,15 @@
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",
     "socket.io-client": "^4.7.5",
-    "use-sound": "^4.0.3"
+    "use-sound": "^4.0.3",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/chess.js": "^0.13.7",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
     "@vitejs/plugin-react": "^4.3.1",

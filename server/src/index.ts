@@ -21,6 +21,12 @@ io.on("connection", (socket: Socket) => {
     console.log(move)
     socket.broadcast.emit("newMove", move)
   })
+  socket.on("join-game", (roomId, cb) => {
+    socket.join(roomId)
+    cb(`Joined game with id: ${roomId}`)
+    const clients = io.sockets.adapter.rooms.get(roomId)
+    console.log(clients?.size)
+  })
 });
 
 httpServer.listen(PORT, () => {

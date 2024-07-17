@@ -13,7 +13,7 @@ export interface BoardProps {
   onDrop: (sourceSquare: Square, targetSquare: Square) => void,
   onSquareClick: (sqaure: Square) => void,
   setSquareStyles: () => {},
-  onPieceDragBegin: (piece: any, square: any) => void
+  onPieceDragBegin: (piece: any, square: any) => void,
 }
 
 export const Board = (props: BoardProps) => {

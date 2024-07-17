@@ -3,6 +3,7 @@ import { useSound } from "use-sound"
 import {Board} from "./components/chessboard/board";
 import { MoveDisplay } from './components/moveDisplay/moveDisplay';
 import { Chess, Square, Move} from 'chess.js';
+import { v4 as uuidv4 } from 'uuid';
 import './App.css';
 
 import moveSound from "./assets/audio/move-self.mp3";
@@ -14,6 +15,11 @@ import checkSound from "./assets/audio/move-check.mp3";
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3000')
+// const roomId = uuidv4()
+
+// socket.emit("join-game", roomId, (message: string) => {
+//   console.log(message)
+// })
 
 const App = () => {
   const [chess] = useState(new Chess());
@@ -24,6 +30,8 @@ const App = () => {
   const [moveCount, setMoveCount] = useState(1)
   const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
   const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
+  const [side, setSide] = useState(chess.turn())
+  const [joinRoomId, setJoinRoomId] = useState("")
 
   // sound effects
   const [playMoveSound] = useSound(moveSound)
@@ -51,6 +59,7 @@ const App = () => {
       setDisplayPosition(chess.fen())
       setMoveCount(chess.history().length)
       playMoveAudio(move)
+      setSide(chess.turn())
       socket.emit("move", move)
     } catch (error) {
         console.log(error)
@@ -129,6 +138,21 @@ const App = () => {
     return styles
   }
 
+  const createNewGame = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault()
+    const roomId = uuidv4()
+    socket.emit("join-game", roomId, (message: string) => {
+      console.log(message)
+      }) 
+  }
+
+  const joinGame = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, roomId: string) => {
+    e.preventDefault()
+    socket.emit("join-game", roomId, (message: string) => {
+      console.log(message)
+      }) 
+  }
+
   return (
     <div className="app">
       <Board 
@@ -149,6 +173,22 @@ const App = () => {
         setSelectedMoveNum={setMoveCount}
         resetSquares={resetHighlightedSquares}
         />
+      <button 
+        className="create-game-btn"
+        onClick={(e) => createNewGame(e)}
+      >Make Game</button>
+      <form>
+        <input 
+          type="text" 
+          className="join-game-text-input"
+          onChange={e => setJoinRoomId(e.target.value)}
+          ></input>
+        <button
+          className="join-game-btn"
+          onClick={e => joinGame(e, joinRoomId)}
+          type="button"
+        >Join Game</button>
+      </form>
     </div>
   )
 }
