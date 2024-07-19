@@ -4,6 +4,8 @@ import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
 import { Chess, Square, Move} from 'chess.js';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation } from "react-router-dom";
+import { useSocket } from "../../contexts/SocketProvider";
 import './game.css';
 
 import moveSound from "../../assets/audio/move-self.mp3";
@@ -11,15 +13,6 @@ import captureSound from "../../assets/audio/capture.mp3";
 import castleSound from "../../assets/audio/castle.mp3";
 import promoteSound from "../../assets/audio/promote.mp3";
 import checkSound from "../../assets/audio/move-check.mp3";
-
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3000')
-// const roomId = uuidv4()
-
-// socket.emit("join-game", roomId, (message: string) => {
-//   console.log(message)
-// })
 
 export const Game = () => {
   const [chess] = useState(new Chess());
@@ -31,7 +24,7 @@ export const Game = () => {
   const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
   const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
   const [side, setSide] = useState(chess.turn())
-  const [joinRoomId, setJoinRoomId] = useState("")
+  const socket = useSocket()
 
   // sound effects
   const [playMoveSound] = useSound(moveSound)
@@ -41,7 +34,7 @@ export const Game = () => {
   const [playCheckSound] = useSound(checkSound)
 
   useEffect(() => {
-    socket.on("newMove", (move) => {
+    socket?.on("newMove", (move) => {
       console.log(`newMove is ${move}`)
     })
   }, [socket])
@@ -60,7 +53,7 @@ export const Game = () => {
       setMoveCount(chess.history().length)
       playMoveAudio(move)
       setSide(chess.turn())
-      socket.emit("move", move)
+      // socket?.emit("move", move)
     } catch (error) {
         console.log(error)
     }
@@ -136,21 +129,6 @@ export const Game = () => {
       styles[square] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
     })
     return styles
-  }
-
-  const createNewGame = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault()
-    const roomId = uuidv4()
-    socket.emit("join-game", roomId, (message: string) => {
-      console.log(message)
-      }) 
-  }
-
-  const joinGame = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, roomId: string) => {
-    e.preventDefault()
-    socket.emit("join-game", roomId, (message: string) => {
-      console.log(message)
-      }) 
   }
 
   return (

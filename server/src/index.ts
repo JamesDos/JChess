@@ -8,6 +8,7 @@ app.use(cors())
 const PORT = 3000;
 
 const httpServer = createServer();
+const games = {}
 
 export const io = new Server(httpServer, {
   cors: {
@@ -17,16 +18,20 @@ export const io = new Server(httpServer, {
 
 io.on("connection", (socket: Socket) => {
   console.log(socket.id)
+  socket.on("join-game", (roomId, cb) => {
+    const clients = io.sockets.adapter.rooms.get(roomId)
+    if (clients?.size || 0 > 2) {
+      cb(`Room is full! Room has ${clients?.size} users`)
+    } else {
+      socket.join(roomId)
+      cb(`Joined game with id: ${roomId} with ${clients?.size} users`)
+    }
+  })
   socket.on("move", (move) => {
     console.log(move)
     socket.broadcast.emit("newMove", move)
   })
-  socket.on("join-game", (roomId, cb) => {
-    socket.join(roomId)
-    cb(`Joined game with id: ${roomId}`)
-    const clients = io.sockets.adapter.rooms.get(roomId)
-    console.log(clients?.size)
-  })
+  
 });
 
 httpServer.listen(PORT, () => {
@@ -35,31 +40,3 @@ httpServer.listen(PORT, () => {
 
 
 
-// //New imports
-// const http = require('http').Server(app);
-// const cors = require('cors');
-
-// app.use(cors());
-
-// const socketIO = require('socket.io')(http, {
-//   cors: {
-//       origin: "http://localhost:3000"
-//   }
-// });
-
-// socketIO.on('connection', (socket) => {
-//   console.log(`⚡: ${socket.id} user just connected!`);
-//   socket.on('disconnect', () => {
-//     console.log('🔥: A user disconnected');
-//   });
-// });
-
-// app.get('/api', (req: Request, res: Response) => {
-//   res.json({
-//     message: 'Hello world',
-//   });
-// });
-
-// http.listen(PORT, () => {
-//   console.log(`Server listening on ${PORT}`);
-// });
