@@ -11,11 +11,6 @@ export interface LobbyProps {
   setPlayers: React.Dispatch<React.SetStateAction<{id: string}[]>>,
 }
 
-interface joinRoomRes {
-
-}
-
-
 export const Lobby = (props: LobbyProps) => {
   // const socket= useSocket()
 
@@ -34,7 +29,7 @@ export const Lobby = (props: LobbyProps) => {
 
   const joinGame = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
-    socket.emit("join-room", {roomId: joinRoomId}, (res) => {
+    socket.emit("join-room", {roomId: joinRoomId}, (res: any) => {
       if (res.error) {
         console.log(res.message)
         return 

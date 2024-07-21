@@ -70,6 +70,29 @@ io.on("connection", (socket: Socket) => {
     console.log(`Sent move to Room ${moveData.room}`)
     socket.to(moveData.room).emit("move", moveData.move)
   })
+  socket.on("disconnect", () => {
+    const gameRooms = Array.from(rooms.values()) // list of all game rooms
+    gameRooms.forEach(room => {
+      // find which rooms the disconnected client joined using socket's id
+      const userInRoom = room.players.find((player: {id: string}) => player.id === socket.id)
+      if (userInRoom) {
+        if (room.players.length < 2) {
+          rooms.delete(room.roomId)
+          return 
+        }
+      }
+      // emit to all clients in room that player disconnected
+      socket.to(room.roomId).emit("player-disconnected", userInRoom)
+    })
+  })
+  socket.on("close-room", async (data) => {
+    socket.to(data.roomId).emit("close-room", data)
+    const clientSockets = await io.in(data.roomId).fetchSockets() // get array of all sockets in room
+    clientSockets.forEach(s => {
+      s.leave(data.roomId) // force socket to leave room
+    })
+    rooms.delete(data.roomId)
+  })
   
 });
 

@@ -3,10 +3,11 @@ import { Game } from "./pages/game/game";
 import { Lobby } from "./pages/lobby/lobby";
 import { useState, useEffect, useCallback} from "react";
 import socket from "./connections/socket";
+import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 const App = () => {
   const [room, setRoom] = useState("")
-  const [orientation, setOrientation] = useState("")
+  const [orientation, setOrientation] = useState<BoardOrientation | string>("")
   const [players, setPlayers] = useState<{id: string}[]>([])
 
   // resets game to initial state
@@ -16,30 +17,13 @@ const App = () => {
     setPlayers([]);
   }, []);
 
-  // socket?.on("opponent-joined", (roomData) => {
-  //   console.log("roomData", roomData)
-  //   setPlayers(roomData.players);
-  // });
-
   useEffect(() => {
-    // const onOpponentJoined = (roomData) => {
-    //   console.log("effect called")
-    //   setPlayers(roomData.players)
-    // }
-    // socket.on("opponent-joined", onOpponentJoined)
-
-    // return () => {
-    //   socket?.off("opponent-joined", onOpponentJoined)
-    // }
     socket.on("opponent-joined", (roomData) => {
       console.log("effect called")
       console.log("roomData", roomData)
       setPlayers(roomData.players);
     });
   }, [])
-
-  console.log(`My id is ${socket.id}`)
-  console.log(`Curr players is ${players}`)
 
   return (
     <Routes>

@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSound } from "use-sound";
 import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
-import { Chess, Square, Move} from 'chess.js';
-import { v4 as uuidv4 } from 'uuid';
-import { useLocation } from "react-router-dom";
+import { Chess, Square, Move, Piece, Color} from 'chess.js';
 // import { useSocket } from "../../contexts/SocketProvider";
 import socket from "../../connections/socket";
 import './game.css';
@@ -14,23 +12,31 @@ import captureSound from "../../assets/audio/capture.mp3";
 import castleSound from "../../assets/audio/castle.mp3";
 import promoteSound from "../../assets/audio/promote.mp3";
 import checkSound from "../../assets/audio/move-check.mp3";
+import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 export interface GameProps {
   room: string, 
-  orientation: string, 
+  orientation: BoardOrientation | string, 
   players: {id: string}[],
   cleanup: () => void,
+}
+
+export interface moveData {
+  from: string,
+  to: string, 
+  color: Color, 
+  promotion: string,
 }
 
 export const Game = (props: GameProps) => {
   const chess = useMemo(() => new Chess(), []);
   const [displayPosition, setDisplayPosition] = useState('start')
-  const [draggable, setDraggable] = useState(true)
   const [position, setPosition] = useState('start'); // fen string representation of position
+  const [draggable, setDraggable] = useState(true)
   const [gameHistory, setGameHistory] = useState(chess.history({verbose: true}))
   const [moveCount, setMoveCount] = useState(1)
-  const [selectedSquare, setSelectedSquare] = useState((null as unknown) as Square | null)
-  const [dottedSquares, setDottedSquares] = useState(([] as unknown[]) as Square[])
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null)
+  const [dottedSquares, setDottedSquares] = useState<Square[]>([])
   const [over, setOver] = useState("")
   // const socket = useSocket()
 
@@ -53,7 +59,7 @@ export const Game = (props: GameProps) => {
     }
   }
 
-  const makeMove = useCallback((moveData) => {
+  const makeMove = useCallback((moveData: moveData) => {
     try {
       const move = chess.move(moveData)
       
@@ -101,6 +107,20 @@ export const Game = (props: GameProps) => {
     })
   }, [makeMove])
 
+  useEffect(() => {
+    socket.on("player-disconnected", (player) => {
+      setOver(`Opponent with id ${player} has disconnected`)
+    })
+  }, [])
+
+  useEffect(() => {
+    socket.on("close-room", ({roomId}) => {
+      if (roomId === props.room) { // check if id of close room is same as current room
+        props.cleanup()
+      }
+    })
+  }, [props.room, props.cleanup])
+
   const playMoveAudio = (move: Move) => {
     if (chess.inCheck()) {
       playCheckSound()
@@ -125,6 +145,8 @@ export const Game = (props: GameProps) => {
     }
   }
 
+  // Helper functions
+
   const handleSetBoardToPos = (pos: string) => {
     setDisplayPosition(pos)
     setDraggable(pos === position)
@@ -134,15 +156,31 @@ export const Game = (props: GameProps) => {
     return chess.moves({square: square, verbose: true}).map(move => move.to)
   }
 
+  const resetHighlightedSquares = () => {
+    setSelectedSquare(null)
+    setDottedSquares([])
+  }
+
+  const updateHighlightedSquares = (sqaure: Square) => {
+    setSelectedSquare(sqaure)
+    setDottedSquares(getPossibleMoves(sqaure))
+  }
+
+  // Event handlers
+
   const handleDropPiece = (sourceSquare: Square, targetSquare: Square) => {
+    const madeMove = handleMakeMove(sourceSquare, targetSquare)
     if (dottedSquares.includes(targetSquare)) {
-      handleMakeMove(sourceSquare, targetSquare)
       setSelectedSquare(null)
       setDottedSquares([sourceSquare, targetSquare])
     }
+    return madeMove
   }
 
   const handleSquareClick = (sqaure: Square) => {
+    if (!selectedSquare) {
+      return
+    }
     if (dottedSquares.includes(sqaure)) {
       handleMakeMove(selectedSquare, sqaure)
       setSelectedSquare(null)
@@ -152,18 +190,16 @@ export const Game = (props: GameProps) => {
     }
   }
 
-  const updateHighlightedSquares = (sqaure: Square) => {
-    setSelectedSquare(sqaure)
-    setDottedSquares(getPossibleMoves(sqaure))
+  const handlePieceClick = (piece: string, square: Square) => {
+    updateHighlightedSquares(square)
   }
 
-  const resetHighlightedSquares = () => {
-    setSelectedSquare(null)
-    setDottedSquares([])
+  const handlePieceDragBegin = (piece: string, square: Square) => {
+    updateHighlightedSquares(square)
   }
 
   const determineSquareStyles = () => {
-    const styles = {}
+    const styles: { [key: string]: { backgroundColor: string } } = {};
     if (selectedSquare) {
       styles[selectedSquare] = { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
     }
@@ -180,11 +216,11 @@ export const Game = (props: GameProps) => {
           position={draggable ? position : displayPosition}
           onPieceDrop={handleDropPiece} 
           arePiecesDraggable={draggable}
-          onPieceClick={getPossibleMoves}
+          onPieceClick={handlePieceClick}
           onSquareClick={handleSquareClick}
           customSquareStyles={determineSquareStyles()}
-          onPieceDragBegin={(piece, square) => updateHighlightedSquares(square)}
-          boardOrientation={props.orientation}
+          onPieceDragBegin={handlePieceDragBegin}
+          boardOrientation={props.orientation as BoardOrientation}
         />
       </div>
       <MoveDisplay
