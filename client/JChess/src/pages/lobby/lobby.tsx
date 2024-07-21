@@ -3,28 +3,48 @@ import { Link } from "react-router-dom";
 import { io } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 import { useSocket } from "../../contexts/SocketProvider";
+import socket from "../../connections/socket";
 
-export const Lobby = () => {
-  const socket = useSocket()
+export interface LobbyProps {
+  setRoom: React.Dispatch<React.SetStateAction<string>>,
+  setOrientation: React.Dispatch<React.SetStateAction<string>>,
+  setPlayers: React.Dispatch<React.SetStateAction<{id: string}[]>>,
+}
+
+interface joinRoomRes {
+
+}
+
+
+export const Lobby = (props: LobbyProps) => {
+  // const socket= useSocket()
 
   const [makeRoomId, setMakeRoomId] =  useState("")
   const [joinRoomId, setJoinRoomId] = useState("")
 
   const createRoom = useCallback( (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
-    const roomId = uuidv4()
-    setMakeRoomId(roomId)
-    socket?.emit("join-game", roomId, (message: string) => { // user joins new room by default
-      console.log(message)
+    socket.emit("create-room", (room: string) => {
+      console.log(`Created room with id ${room}`)
+      props.setRoom(room)
+      props.setOrientation("white")
+      setMakeRoomId(room)
     })
   }, []) 
 
-  const joinGame = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>, roomId: string) => {
+  const joinGame = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
-    socket?.emit("join-game", roomId, (message: string) => {
-      console.log(message)
-      }) 
-  }, [])
+    socket.emit("join-room", {roomId: joinRoomId}, (res) => {
+      if (res.error) {
+        console.log(res.message)
+        return 
+      }
+      console.log(res)
+      props.setRoom(res?.roomId)
+      props.setPlayers(res?.players)
+      props.setOrientation("black")
+    })
+  }, [joinRoomId])
 
   return (
     <div className="lobby-container">
@@ -39,13 +59,17 @@ export const Lobby = () => {
           className="join-game-text-input"
           onChange={e => setJoinRoomId(e.target.value)}
           ></input>
-        <Link to="/game" state={joinRoomId}>
-          <button
-            className="join-game-btn"
-            onClick={e => joinGame(e, joinRoomId)}
-            type="button"
-          >Join Game</button>
-        </Link >
+        <button
+          className="join-game-btn"
+          onClick={e => joinGame(e)}
+          type="button"
+          >Join Game
+        </button>
+        <Link to="/game">
+          <button>
+            Go To Game
+          </button>
+        </Link>
       </form>
     </div>
   )

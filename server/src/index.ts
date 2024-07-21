@@ -2,13 +2,15 @@ import express, { Request, Response } from "express";
 import { createServer } from "http";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
+import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
 app.use(cors())
 const PORT = 3000;
 
 const httpServer = createServer();
-const games = {}
+// maps socketIds to list of players in the game that player with socketId is in
+const rooms = new Map(); 
 
 export const io = new Server(httpServer, {
   cors: {
@@ -17,19 +19,56 @@ export const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket: Socket) => {
-  console.log(socket.id)
-  socket.on("join-game", (roomId, cb) => {
-    const clients = io.sockets.adapter.rooms.get(roomId)
-    if (clients?.size || 0 > 2) {
-      cb(`Room is full! Room has ${clients?.size} users`)
-    } else {
-      socket.join(roomId)
-      cb(`Joined game with id: ${roomId} with ${clients?.size} users`)
-    }
+  socket.on("create-room", async (cb) => {
+    const roomId = uuidv4() // create new room with roomId
+    await socket.join(roomId)
+    rooms.set(roomId, { // update rooms map to include new room
+      roomId, 
+      players: [{id: socket.id}]
+    })
+    cb(roomId)
   })
-  socket.on("move", (move) => {
-    console.log(move)
-    socket.broadcast.emit("newMove", move)
+  socket.on("join-room", async (roomData, cb) => {
+    console.log(`RoomId is ${roomData.roomId}`)
+    const room = rooms.get(roomData.roomId)
+    let error, message;
+    if (!room) { // if room does not exist send error through callback
+      error = true;
+      message = 'room does not exist';
+    } else if (room.length <= 0) { // room is empty
+      error = true;
+      message = 'room is empty';
+    } else if (room.length >= 2) { // room is full
+      error = true;
+      message = 'room is full';
+    }
+    if (error) {
+      // if there's an error, check if the client passed a callback,
+      // call the callback (if it exists) with an error object and exit or 
+      // just exit if the callback is not given
+      if (cb) { // if user passed a callback, call it with an error payload
+        cb({
+          error,
+          message
+        });
+      }
+      return
+    }
+    await socket.join(roomData.roomId)
+    const updatedRoom = {
+      ...room, 
+      players: [...room.players, {id: socket.id}]
+    }
+    rooms.set(roomData.id, updatedRoom)
+    cb(updatedRoom) // pass room details to client
+    console.log(`Emitting opponent join to ${roomData.roomId}`)
+    socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
+  })
+  socket.on("move", (moveData) => {
+    console.log(moveData.move)
+    console.log(moveData.room)
+    console.log(`Sent move to Room ${moveData.room}`)
+    socket.to(moveData.room).emit("move", moveData.move)
   })
   
 });
