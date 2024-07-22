@@ -3,7 +3,6 @@ import { useSound } from "use-sound";
 import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
 import { Chess, Square, Move, Piece, Color} from 'chess.js';
-// import { useSocket } from "../../contexts/SocketProvider";
 import socket from "../../connections/socket";
 import './game.css';
 
@@ -38,7 +37,6 @@ export const Game = (props: GameProps) => {
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null)
   const [dottedSquares, setDottedSquares] = useState<Square[]>([])
   const [over, setOver] = useState("")
-  // const socket = useSocket()
 
   // sound effects
   const [playMoveSound] = useSound(moveSound)
@@ -46,6 +44,8 @@ export const Game = (props: GameProps) => {
   const [playCastleSound] = useSound(castleSound)
   const [playPromoteSound] = useSound(promoteSound)
   const [playCheckSound] = useSound(checkSound)
+
+  // Move Functions
 
   const checkGameOver = () => {
     if (chess.isGameOver()) {
@@ -100,27 +100,6 @@ export const Game = (props: GameProps) => {
     return true
   }
 
-  useEffect(() => {
-    socket.on("move", (move) => {
-      console.log(`move is ${move}`)
-      makeMove(move)
-    })
-  }, [makeMove])
-
-  useEffect(() => {
-    socket.on("player-disconnected", (player) => {
-      setOver(`Opponent with id ${player} has disconnected`)
-    })
-  }, [])
-
-  useEffect(() => {
-    socket.on("close-room", ({roomId}) => {
-      if (roomId === props.room) { // check if id of close room is same as current room
-        props.cleanup()
-      }
-    })
-  }, [props.room, props.cleanup])
-
   const playMoveAudio = (move: Move) => {
     if (chess.inCheck()) {
       playCheckSound()
@@ -144,6 +123,41 @@ export const Game = (props: GameProps) => {
         playMoveSound()
     }
   }
+
+  // Effects
+
+  useEffect(() => {
+    socket.on("move", (move) => {
+      console.log(`move is ${move}`)
+      makeMove(move)
+    })
+  }, [makeMove])
+
+  useEffect(() => {
+    socket.on("player-disconnected", (player) => {
+      setOver(`Opponent with id ${player} has disconnected`)
+    })
+  }, [])
+
+  useEffect(() => {
+    socket.on("close-room", ({roomId}) => {
+      if (roomId === props.room) { // check if id of close room is same as current room
+        props.cleanup()
+      }
+    })
+  }, [props.room, props.cleanup])
+
+  // useEffect(() => {
+  //   const onKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === "ArrowLeft") {
+  //       console.log('left arrow')
+  //     } else if (e.key === "ArrowRight") {
+  //       console.log('right arrow')
+  //     }
+  //   }
+  //   window.addEventListener("keydown", onKeyDown)
+  //   return () => window.removeEventListener('keydown', onKeyDown)
+  // }, [])
 
   // Helper functions
 
@@ -178,7 +192,7 @@ export const Game = (props: GameProps) => {
   }
 
   const handleSquareClick = (sqaure: Square) => {
-    if (!selectedSquare) {
+    if (!selectedSquare || !draggable) {
       return
     }
     if (dottedSquares.includes(sqaure)) {
@@ -191,11 +205,15 @@ export const Game = (props: GameProps) => {
   }
 
   const handlePieceClick = (piece: string, square: Square) => {
-    updateHighlightedSquares(square)
+    if (draggable) {
+      updateHighlightedSquares(square)
+    }
   }
 
   const handlePieceDragBegin = (piece: string, square: Square) => {
-    updateHighlightedSquares(square)
+    if (draggable) {
+      updateHighlightedSquares(square)
+    }
   }
 
   const determineSquareStyles = () => {

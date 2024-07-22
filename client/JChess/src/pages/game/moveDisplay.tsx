@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import back1 from "../../assets/images/back1.png";
 import backFull from "../../assets/images/backFull.png";
 import forward1 from "../../assets/images/forward1.png";
@@ -24,10 +24,12 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   }
 
   const moveForwardOne = () => {
+    console.log(props.selectedMoveNum)
+    console.log(props.history.length)
     if (props.selectedMoveNum < props.history.length) {
-      props.setSelectedMoveNum(prevNum => prevNum + 1)
       // selectedMoveNum - 1 === index of position in history
       // Thus, index of next move === selectedMoveNum
+      props.setSelectedMoveNum(prevNum => prevNum + 1)
       props.setBoard(props.history[props.selectedMoveNum].after)
       props.resetSquares()
     }
@@ -42,6 +44,8 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   }
 
   const moveBackwardsOne = () => {
+    console.log(`Selected Move Num ${props.selectedMoveNum}`)
+    console.log(`History length ${props.history.length}`)
     if (props.selectedMoveNum > 1) {
       props.setSelectedMoveNum(prevNum => prevNum - 1)
       props.setBoard(props.history[props.selectedMoveNum - 2].after)
@@ -55,8 +59,22 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
       props.setBoard(props.history[0].after)
       props.resetSquares()
     }
-
   }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        console.log('left arrow')
+        moveBackwardsOne()
+      } else if (e.key === "ArrowRight") {
+        console.log('right arrow')
+        moveForwardOne()
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [moveBackwardsOne, moveForwardOne])
+
 
   const rowItemList = []
   for (let i = 0; i < props.history.length; i++) {
