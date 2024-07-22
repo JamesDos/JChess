@@ -3,12 +3,40 @@ import { createServer } from "http";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
+import 'dotenv/config';
+import mongoose from "mongoose";
+import usersRouter from "./routes/users"; 
+import gamesRouter from "./routes/games";
 
+const PORT = process.env.PORT;
 const app = express();
-app.use(cors())
-const PORT = 3000;
 
-const httpServer = createServer();
+let uri: string
+if (process.env.DATABASE_URL) { // handle undefined db url
+  uri = process.env.DATABASE_URL
+} else {
+  throw new Error("DATABASE_URL not set")
+}
+
+mongoose.connect(uri)
+const db = mongoose.connection
+db.on("error", (error) => console.error(error))
+db.once("open", () => console.log("Connected to Database"))
+
+app.use(cors())
+app.use(express.json())
+
+app.get('/', (req, res) => {
+  res.send('hello world')
+})
+
+app.use("/users", usersRouter)
+app.use("/games", gamesRouter)
+
+const httpServer = app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`)
+})
+
 // maps socketIds to list of players in the game that player with socketId is in
 const rooms = new Map(); 
 
@@ -65,8 +93,6 @@ io.on("connection", (socket: Socket) => {
     socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
   })
   socket.on("move", (moveData) => {
-    console.log(moveData.move)
-    console.log(moveData.room)
     console.log(`Sent move to Room ${moveData.room}`)
     socket.to(moveData.room).emit("move", moveData.move)
   })
@@ -94,10 +120,6 @@ io.on("connection", (socket: Socket) => {
     rooms.delete(data.roomId)
   })
   
-});
-
-httpServer.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
 });
 
 

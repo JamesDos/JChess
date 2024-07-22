@@ -1,8 +1,5 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { io } from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid';
-import { useSocket } from "../../contexts/SocketProvider";
 import socket from "../../connections/socket";
 
 export interface LobbyProps {
@@ -12,7 +9,6 @@ export interface LobbyProps {
 }
 
 export const Lobby = (props: LobbyProps) => {
-  // const socket= useSocket()
 
   const [makeRoomId, setMakeRoomId] =  useState("")
   const [joinRoomId, setJoinRoomId] = useState("")

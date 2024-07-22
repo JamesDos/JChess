@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc --build",
-    "start": "node ./dist/index.js",
-    "dev": "nodemon ./src/index.ts"
+    "start": "node ./dist/server.js",
+    "dev": "nodemon ./src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "mongoose": "^8.5.1",
     "socket.io": "^4.7.5",
     "uuid": "^10.0.0"
   },

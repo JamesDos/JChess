@@ -44,8 +44,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   }
 
   const moveBackwardsOne = () => {
-    console.log(`Selected Move Num ${props.selectedMoveNum}`)
-    console.log(`History length ${props.history.length}`)
     if (props.selectedMoveNum > 1) {
       props.setSelectedMoveNum(prevNum => prevNum - 1)
       props.setBoard(props.history[props.selectedMoveNum - 2].after)
@@ -64,10 +62,8 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
-        console.log('left arrow')
         moveBackwardsOne()
       } else if (e.key === "ArrowRight") {
-        console.log('right arrow')
         moveForwardOne()
       }
     }

@@ -147,19 +147,7 @@ export const Game = (props: GameProps) => {
     })
   }, [props.room, props.cleanup])
 
-  // useEffect(() => {
-  //   const onKeyDown = (e: KeyboardEvent) => {
-  //     if (e.key === "ArrowLeft") {
-  //       console.log('left arrow')
-  //     } else if (e.key === "ArrowRight") {
-  //       console.log('right arrow')
-  //     }
-  //   }
-  //   window.addEventListener("keydown", onKeyDown)
-  //   return () => window.removeEventListener('keydown', onKeyDown)
-  // }, [])
-
-  // Helper functions
+  // Helper functions for event handlers
 
   const handleSetBoardToPos = (pos: string) => {
     setDisplayPosition(pos)
