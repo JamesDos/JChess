@@ -57,33 +57,34 @@ usersRouter.post("/", async (req, res) => {
 })
 
 // Update a user
-usersRouter.patch("/:id", getUser, async (req, res) => {
-  if (req.body.userName !== null) {
-    res.locals.userName = req.body.userName
-  }
-  if (req.body.email !== null) {
-    res.locals.email = req.body.email
-  }
-  if (req.body.elo !== null) {
-    res.locals.elo = req.body.elo
-  }
+usersRouter.patch("/:id", async (req, res) => {
+  const updates = req.body;
+
   try {
-    const updatedUser = await res.locals.user.save()
-    res.json(updatedUser)
-  } catch (err) {
-    res.status(400).json(errorMessage(err))
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json(errorMessage("Cannot find user"));
+    }
+
+    res.json(updatedUser);
+  } catch (err: any) {
+    res.status(400).json(errorMessage(err.message));
   }
-})
+});
 
 // Delete user
 usersRouter.delete("/:id", getUser, async (req, res) => {
   try {
-    await res.locals.user.remove()
+    await res.locals.user.deleteOne()
     res.json(successMessage("deleted user"))
   } catch (err) {
     res.status(400).json(errorMessage(err))
   }
 })
-
 
 export default usersRouter

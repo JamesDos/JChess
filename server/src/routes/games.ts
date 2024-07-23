@@ -35,22 +35,23 @@ gamesRouter.get("/:id", getGame, async (req, res) => {
 })
 
 // Get all games by user id from most to least recent
-gamesRouter.get("/:userId", async (req, res) => {
+gamesRouter.get("/user/:userId", async (req, res) => {
   try {
-    const allGames = Game.find({
-      "$or": [{white: req.params.userId}, {black: req.params.userId}]
+    const allGames = await Game.find({
+      $or: [{white: req.params.userId}, {black: req.params.userId}]
     })
     .sort(({date: -1}))
     .exec()
+    res.json(allGames)
   } catch (err) {
     res.status(500).json(errorMessage(err))
   }
 })
 
 // Get all white games by user id from most to least
-gamesRouter.get("/:userId/white", async (req, res) => {
+gamesRouter.get("/user/white/:userId", async (req, res) => {
   try {
-    const whiteGames = Game.where("white").equals(req.params.userId).sort({date: -1})
+    const whiteGames = await Game.where("white").equals(req.params.userId).sort({date: -1})
     res.json(whiteGames)
   } catch (err) {
     res.status(500).json(errorMessage(err))
@@ -58,9 +59,9 @@ gamesRouter.get("/:userId/white", async (req, res) => {
 })
 
 // Get all black games by user id from most to least recent 
-gamesRouter.get("/:userId/black", async (req, res) => {
+gamesRouter.get("/user/black/:userId", async (req, res) => {
   try {
-    const blackGames = Game.where("black").equals(req.params.userId).sort({date: -1})
+    const blackGames = await Game.where("black").equals(req.params.userId).sort({date: -1})
     res.json(blackGames)
   } catch (err) {
     res.status(500).json(errorMessage(err))
@@ -87,26 +88,18 @@ gamesRouter.post("/", async (req, res) => {
 
 // Update game
 gamesRouter.patch("/:id", getGame, async (req, res) => {
-  if (req.body.date !== null) {
-    res.locals.date = req.body.date
-  }
-  if (req.body.pgn !== null) {
-    res.locals.pgn = req.body.pgn
-  }
-  if (req.body.black !== null) {
-    res.locals.black = req.body.black
-  }
-  if (req.body.white !== null) {
-    res.locals.white = req.body.white
-  }
-  if (req.body.blackEloGain !== null) {
-    res.locals.blackEloGain = req.body.blackEloGain
-  }
-  if (req.body.whiteEloGain !== null) {
-    res.locals.whiteEloGain =  req.body.whiteEloGain
-  }
+  const updates = req.body
   try {
-    const updatedGame = await res.locals.game.save()
+    const updatedGame = await Game.findByIdAndUpdate(
+      req.params.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    )
+
+    if (!updatedGame) {
+      return res.status(404).json(errorMessage("Cannot find game"));
+    }
+
     res.json(updatedGame)
   } catch (err) {
     res.status(400).json(errorMessage(err))
@@ -116,8 +109,8 @@ gamesRouter.patch("/:id", getGame, async (req, res) => {
 // Delete game
 gamesRouter.delete("/:id", getGame, async (req, res) => {
   try {
-    await res.locals.game.remove()
-    res.json(successMessage("delete game"))
+    await res.locals.game.deleteOne()
+    res.json(successMessage("deleted game"))
   } catch (err) {
     res.status(400).json(errorMessage(err))
   }
