@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null)
 
@@ -6,8 +7,9 @@ export const useAuth = () => {
   return useContext(AuthContext)
 }
 
-export const AuthProvider = () => {
+export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   const [user, setUser] = useState({name: "", isAuthenticated: false})
+  const [token, setToken] = useState(true)
 
   const login = (userName: string, password: string) => {
     // TODO: Call Auth API to validate userName and password
@@ -19,8 +21,8 @@ export const AuthProvider = () => {
   }
 
   return (
-    <AuthContext.Provider value={{user, login, logout}}>
-      
+    <AuthContext.Provider value={{token, user, login, logout}}>
+      {children}
     </AuthContext.Provider>
   )
 }

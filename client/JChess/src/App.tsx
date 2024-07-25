@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback} from "react";
 import socket from "./connections/socket";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { PrivateRoutes } from "./utils/PrivateRoutes";
+import { AuthProvider } from "./contexts/AuthProvider";
 
 const App = () => {
   const [room, setRoom] = useState("")
@@ -30,27 +31,29 @@ const App = () => {
 
   return (
     <div className="app">
-      <Routes>
-        <Route element={<PrivateRoutes/>}>
-          <Route path="/" element={<Home/>}/>
-          <Route path="/lobby" element={
-            <Lobby
-              setRoom={setRoom}
-              setOrientation={setOrientation}
-              setPlayers={setPlayers}
-            />
-          }/>
-        <Route path="/game" element={
-            <Game
-              room={room}
-              orientation={orientation}
-              players={players}
-              cleanup={cleanup}
-            />
-          }/>
-        </Route>
-        <Route path="/login" element={<Login/> }/>
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login/> }/>
+          <Route element={<PrivateRoutes/>}>
+            <Route path="/" element={<Home/>}/>
+            <Route path="/lobby" element={
+              <Lobby
+                setRoom={setRoom}
+                setOrientation={setOrientation}
+                setPlayers={setPlayers}
+              />
+            }/>
+          <Route path="/game" element={
+              <Game
+                room={room}
+                orientation={orientation}
+                players={players}
+                cleanup={cleanup}
+              />
+            }/>
+          </Route>
+        </Routes>
+      </AuthProvider>
     </div>
   )
 }
