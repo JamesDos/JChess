@@ -1,8 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-import { Game } from "./pages/game/game";
-import { Lobby } from "./pages/lobby/lobby";
-import { Login } from "./pages/login/login";
-import { Home } from "./pages/home/home";
+import { Game } from "./pages/Game/game";
+import { Lobby } from "./pages/Lobby/lobby";
+import { Login } from "./pages/Login/login";
+import { Home } from "./pages/Home/home";
 import { useState, useEffect, useCallback} from "react";
 import socket from "./connections/socket";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";

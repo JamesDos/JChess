@@ -23,7 +23,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     props.resetSquares()
   }
 
-  const moveForwardOne = () => {
+  const moveForwardOne = useCallback(() => {
     console.log(props.selectedMoveNum)
     console.log(props.history.length)
     if (props.selectedMoveNum < props.history.length) {
@@ -33,7 +33,7 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
       props.setBoard(props.history[props.selectedMoveNum].after)
       props.resetSquares()
     }
-  }
+  }, [props])
 
   const moveForwardFull = () => {
     if (props.selectedMoveNum < props.history.length) {
@@ -43,13 +43,13 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     }
   }
 
-  const moveBackwardsOne = () => {
+  const moveBackwardsOne = useCallback(() => {
     if (props.selectedMoveNum > 1) {
       props.setSelectedMoveNum(prevNum => prevNum - 1)
       props.setBoard(props.history[props.selectedMoveNum - 2].after)
       props.resetSquares()
     }
-  }
+  }, [props])
 
   const moveBackwardsFull = () => {
     if (props.selectedMoveNum > 1) {

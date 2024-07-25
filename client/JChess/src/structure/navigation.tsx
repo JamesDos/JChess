@@ -1,5 +1,5 @@
-import { Lobby } from "../pages/lobby/lobby";
-import { Game } from "../pages/game/game";
+import { Lobby } from "../pages/Lobby/lobby";
+import { Game } from "../pages/Game/game";
 
 export const nav = [
   { path: "/", name: "Home", element: <Home />, isMenu: true, isPrivate: false },
