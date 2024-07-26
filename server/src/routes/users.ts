@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import User from "../models/user";
+import bcrypt from "bcrypt";
 
 const usersRouter = express.Router()
 
@@ -18,7 +19,7 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     user = await User.findById(req.params.id)
     if (user === null) {
-      return res.status(404).json(errorMessage("cannot find user"))
+      return res.status(404).json(errorMessage("Cannot find user!"))
     }
   } catch (err: any) {
     return res.status(500).json({message: err.message})
@@ -44,16 +45,36 @@ usersRouter.get("/:id", getUser, async (req, res) => {
 
 // Create a user 
 usersRouter.post("/", async (req, res) => {
-  const user = new User({
-    userName: req.body.userName,
-    email: req.body.email,
-  })
   try {
+    const existingUser = await User.where("userName").equals(req.body.userName)
+    if (existingUser !== null) {
+      return res.status(409).json({message: "userName taken!"})
+    }
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    const user = new User({
+      userName: req.body.userName,
+      password: hashedPassword
+    })
     const newUser = await user.save()
     res.status(201).json(newUser)
   } catch (err) {
     res.status(400).json(errorMessage(err))
   }
+})
+
+// Check user login
+usersRouter.post("/login", getUser, async (req, res) => {
+  const user = res.locals.user
+  if (await bcrypt.compare(req.body.password, user.password)) {
+    // TODO: Create JWTs
+    res.json(successMessage("user logged in"))
+  } else {
+    res.status(401).json({message: "Unauthorized!"})
+  }
+  res.status(401).json({message: "Unauthorized!"})
+
+
+
 })
 
 // Update a user

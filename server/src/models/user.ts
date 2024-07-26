@@ -5,10 +5,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  email: {
+  password: {
     type: String,
-    required: true,
-    lowercase: true,
+    required: true
   },
   elo: {
     type: Number,
