@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSound } from "use-sound";
 import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
-import { Chess, Square, Move, Piece, Color} from 'chess.js';
+import { Chess, Square, Move, Color} from 'chess.js';
 import socket from "../../connections/socket";
+import { useGameSetUp } from "../../contexts/GameSetUpProvider";
 import './game.css';
 
 import moveSound from "../../assets/audio/move-self.mp3";
@@ -27,7 +28,10 @@ export interface moveData {
   promotion: string,
 }
 
-export const Game = (props: GameProps) => {
+export const Game = () => {
+
+  const { room, orientation, players, dispatch } = useGameSetUp()
+
   const chess = useMemo(() => new Chess(), []);
   const [displayPosition, setDisplayPosition] = useState('start')
   const [position, setPosition] = useState('start'); // fen string representation of position
@@ -47,7 +51,7 @@ export const Game = (props: GameProps) => {
 
   // Move Functions
 
-  const checkGameOver = () => {
+  const checkGameOver = useCallback(() => {
     if (chess.isGameOver()) {
       if (chess.isCheckmate()) {
         setOver(`Checkmate! ${chess.turn() === "w" ? "black": "white"} wins!`)
@@ -57,50 +61,9 @@ export const Game = (props: GameProps) => {
         setOver(`Game Over!`)
       }
     }
-  }
-
-  const makeMove = useCallback((moveData: moveData) => {
-    try {
-      const move = chess.move(moveData)
-      
-      checkGameOver()
-      setGameHistory(chess.history({verbose: true}))
-      setPosition(chess.fen())
-      setDisplayPosition(chess.fen())
-      setMoveCount(chess.history().length)
-      playMoveAudio(move)
-
-      return move
-    } catch (e) { // catch illegal move error
-      return null;
-    }
   }, [chess])
 
-  const handleMakeMove = (sourceSquare: string, targetSquare: string) => {
-    if (chess.turn() != props.orientation[0]) { // chess.turn is 'w' || 'b'
-      console.log("Not your turn!")
-      return false // prevents players from moving other player's pieces
-    }
-    if (props.players.length < 2) { // prevents move if both players not connected
-      console.log(props.players)
-      console.log("At least one player has not connected")
-      return false
-    }
-    const moveData = {
-      from: sourceSquare,
-      to: targetSquare,
-      color: chess.turn(),
-      promotion: 'q' // always promote to queen for simplicity
-    }
-    const move = makeMove(moveData)
-    if (move === null) {
-      return false
-    }
-    socket.emit("move", { move: move, room: props.room})
-    return true
-  }
-
-  const playMoveAudio = (move: Move) => {
+  const playMoveAudio = useCallback((move: Move) => {
     if (chess.inCheck()) {
       playCheckSound()
       return;
@@ -122,6 +85,47 @@ export const Game = (props: GameProps) => {
       default:
         playMoveSound()
     }
+  }, [chess, playCheckSound, playCaptureSound, playPromoteSound, playCastleSound, playMoveSound])
+
+  const makeMove = useCallback((moveData: moveData) => {
+    try {
+      const move = chess.move(moveData)
+      
+      checkGameOver()
+      setGameHistory(chess.history({verbose: true}))
+      setPosition(chess.fen())
+      setDisplayPosition(chess.fen())
+      setMoveCount(chess.history().length)
+      playMoveAudio(move)
+
+      return move
+    } catch (e) { // catch illegal move error
+      return null;
+    }
+  }, [chess, checkGameOver, playMoveAudio])
+
+  const handleMakeMove = (sourceSquare: string, targetSquare: string) => {
+    if (chess.turn() != orientation[0]) { // chess.turn is 'w' || 'b'
+      console.log("Not your turn!")
+      return false // prevents players from moving other player's pieces
+    }
+    if (players.length < 2) { // prevents move if both players not connected
+      console.log(players)
+      console.log("At least one player has not connected")
+      return false
+    }
+    const moveData = {
+      from: sourceSquare,
+      to: targetSquare,
+      color: chess.turn(),
+      promotion: 'q' // always promote to queen for simplicity
+    }
+    const move = makeMove(moveData)
+    if (move === null) {
+      return false
+    }
+    socket.emit("move", { move: move, room: room})
+    return true
   }
 
   // Effects
@@ -141,11 +145,14 @@ export const Game = (props: GameProps) => {
 
   useEffect(() => {
     socket.on("close-room", ({roomId}) => {
-      if (roomId === props.room) { // check if id of close room is same as current room
-        props.cleanup()
+      if (roomId === room) {
+        dispatch({type: "cleanup-room"})
       }
+      // if (roomId === props.room) { // check if id of close room is same as current room
+      //   props.cleanup()
+      // }
     })
-  }, [props.room, props.cleanup])
+  }, [dispatch, room])
 
   // Helper functions for event handlers
 
@@ -226,7 +233,7 @@ export const Game = (props: GameProps) => {
           onSquareClick={handleSquareClick}
           customSquareStyles={determineSquareStyles()}
           onPieceDragBegin={handlePieceDragBegin}
-          boardOrientation={props.orientation as BoardOrientation}
+          boardOrientation={orientation as BoardOrientation}
         />
       </div>
       <MoveDisplay
@@ -236,6 +243,9 @@ export const Game = (props: GameProps) => {
         setSelectedMoveNum={setMoveCount}
         resetSquares={resetHighlightedSquares}
         />
+      <div className="game-result-container">
+        {over}
+      </div>
     </div>
   )
 }

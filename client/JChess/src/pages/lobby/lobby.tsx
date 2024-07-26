@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import socket from "../../connections/socket";
+import { useGameSetUp } from "../../contexts/GameSetUpProvider";
 
 export interface LobbyProps {
   setRoom: React.Dispatch<React.SetStateAction<string>>,
@@ -8,7 +9,10 @@ export interface LobbyProps {
   setPlayers: React.Dispatch<React.SetStateAction<{id: string}[]>>,
 }
 
-export const Lobby = (props: LobbyProps) => {
+export const Lobby = () => {
+
+  const { dispatch } = useGameSetUp()
+
 
   const [makeRoomId, setMakeRoomId] =  useState("")
   const [joinRoomId, setJoinRoomId] = useState("")
@@ -17,11 +21,12 @@ export const Lobby = (props: LobbyProps) => {
     e.preventDefault()
     socket.emit("create-room", (room: string) => {
       console.log(`Created room with id ${room}`)
-      props.setRoom(room)
-      props.setOrientation("white")
+      // props.setRoom(room)
+      // props.setOrientation("white")
+      dispatch({ type: "create-room", room: room })
       setMakeRoomId(room)
     })
-  }, []) 
+  }, [dispatch]) 
 
   const joinGame = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
@@ -31,11 +36,12 @@ export const Lobby = (props: LobbyProps) => {
         return 
       }
       console.log(res)
-      props.setRoom(res?.roomId)
-      props.setPlayers(res?.players)
-      props.setOrientation("black")
+      // props.setRoom(res?.roomId)
+      // props.setPlayers(res?.players)
+      // props.setOrientation("black")
+      dispatch({ type: "join-room", room: res.roomId, newPlayers: res.players})
     })
-  }, [joinRoomId])
+  }, [dispatch, joinRoomId])
 
   return (
     <div className="lobby-container">

@@ -12,11 +12,11 @@ body {
   color: var(--word-color)
 }
 
-.app {
+/* .app {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   place-content: center;
   height: 100vh;
-}
+} */
 
 

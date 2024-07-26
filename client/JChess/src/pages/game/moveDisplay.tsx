@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import back1 from "../../assets/images/back1.png";
 import backFull from "../../assets/images/backFull.png";
 import forward1 from "../../assets/images/forward1.png";

@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthProvider";
 
 export const PrivateRoutes = () => {
   // const user = useAuth()
-  const auth = {"token": false}
+  const auth = {"token": true}
   return (
     // user.token ? <Outlet/> : <Navigate to="/login"/>
     auth.token ? <Outlet/> : <Navigate to="/login"/>
