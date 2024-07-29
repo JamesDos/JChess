@@ -4,9 +4,11 @@ import cors from "cors";
 import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
+import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import usersRouter from "./routes/users"; 
 import gamesRouter from "./routes/games";
+import { verifyJWT } from "./middleware/verifyJWT";
 
 const PORT = process.env.PORT;
 const app = express();
@@ -25,11 +27,16 @@ db.once("open", () => console.log("Connected to Database"))
 
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser())
 
 app.get('/', (req, res) => {
   res.send('hello world')
 })
 
+
+// routes
+
+app.use(verifyJWT)
 app.use("/users", usersRouter)
 app.use("/games", gamesRouter)
 
