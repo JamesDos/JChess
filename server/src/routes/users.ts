@@ -3,7 +3,9 @@ import User from "../models/user";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
-import { userToken } from "../types/custom"
+import * as usersController from "../controllers/usersController";
+import { userToken } from "../types/custom";
+import { getUser } from "../middleware/getUser";
 
 const usersRouter = express.Router()
 
@@ -17,19 +19,19 @@ export const successMessage = (message: string) => {
 }
 
 // Middleware functions
-const getUser = async (req: Request, res: Response, next: NextFunction) => {
-  let user;
-  try {
-    user = await User.findById(req.params.id)
-    if (user === null) {
-      return res.status(404).json(errorMessage("Cannot find user!"))
-    }
-  } catch (err: any) {
-    return res.status(500).json({message: err.message})
-  }
-  res.locals.user = user
-  next()
-}
+// const getUser = async (req: Request, res: Response, next: NextFunction) => {
+//   let user;
+//   try {
+//     user = await User.findById(req.params.id)
+//     if (user === null) {
+//       return res.status(404).json(errorMessage("Cannot find user!"))
+//     }
+//   } catch (err: any) {
+//     return res.status(500).json({message: err.message})
+//   }
+//   res.locals.user = user
+//   next()
+// }
 
 const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"]
@@ -42,7 +44,7 @@ const authenticateToken = async (req: Request, res: Response, next: NextFunction
     if (err) {
       return res.sendStatus(403) // token no longer valid (forbidden)
     }
-    req.username = (decoded as userToken).username
+    req.user = (decoded as userToken)
     next()
   })
 }
@@ -98,40 +100,15 @@ const handleLogout = async (req: Request, res: Response) => {
   res.sendStatus(204)
 }
 
+usersRouter.route("/")
+  .get(usersController.getAllUsers)
+  // .post(usersController.createUser)
 
-// Get all users
-usersRouter.get("/", async (req, res) => {
-  try {
-    const users = await User.find()
-    res.json(users)
-  } catch (err) {
-    res.status(500).json(errorMessage(err))
-  }
-})
+usersRouter.route("/:id")
+  .get(getUser, usersController.getUserById)
+  .patch(usersController.updateUser)
+  .delete(getUser, usersController.deleteUser)
 
-// Get one user
-usersRouter.get("/:id", getUser, async (req, res) => {
-  res.json(res.locals.user)
-})
-
-// Create a user 
-usersRouter.post("/", async (req, res) => {
-  try {
-    const existingUser = await User.where("userName").equals(req.body.userName)
-    if (existingUser !== null) {
-      return res.status(409).json({message: "userName taken!"})
-    }
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    const user = new User({
-      userName: req.body.userName,
-      password: hashedPassword
-    })
-    const newUser = await user.save()
-    res.status(201).json(newUser)
-  } catch (err) {
-    res.status(400).json(errorMessage(err))
-  }
-})
 
 // Check user login
 usersRouter.post("/login", getUser, async (req, res) => {
@@ -162,35 +139,5 @@ usersRouter.post("/login", getUser, async (req, res) => {
   }
 })
 
-// Update a user
-usersRouter.patch("/:id", async (req, res) => {
-  const updates = req.body;
-
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json(errorMessage("Cannot find user"));
-    }
-
-    res.json(updatedUser);
-  } catch (err: any) {
-    res.status(400).json(errorMessage(err.message));
-  }
-});
-
-// Delete user
-usersRouter.delete("/:id", getUser, async (req, res) => {
-  try {
-    await res.locals.user.deleteOne()
-    res.json(successMessage("deleted user"))
-  } catch (err) {
-    res.status(400).json(errorMessage(err))
-  }
-})
 
 export default usersRouter

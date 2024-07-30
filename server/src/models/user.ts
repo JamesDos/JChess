@@ -18,7 +18,11 @@ const userSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.ObjectId,
     ref: "Friend",
     default: []
-  }]
+  }],
+  refreshToken: {
+    type: String,
+    default: ""
+  }
 })
 
 const userModel = mongoose.model("User", userSchema)

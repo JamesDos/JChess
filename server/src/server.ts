@@ -8,6 +8,10 @@ import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import usersRouter from "./routes/users"; 
 import gamesRouter from "./routes/games";
+import registerRouter from "./routes/register";
+import authRouter from "./routes/auth";
+import refreshTokenRouter from "./routes/refresh";
+import logoutRouter from "./routes/logout";
 import { verifyJWT } from "./middleware/verifyJWT";
 
 const PORT = process.env.PORT;
@@ -29,16 +33,29 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 
+// routes
 app.get('/', (req, res) => {
   res.send('hello world')
 })
+app.use("/login", authRouter)
+app.use("/register", registerRouter)
+app.use("/refresh", refreshTokenRouter)
+app.use("/logout", logoutRouter)
 
 
-// routes
-
+// protected routes
 app.use(verifyJWT)
 app.use("/users", usersRouter)
 app.use("/games", gamesRouter)
+
+app.all("*", (req, res) => {
+  res.status(404)
+  if (req.accepts("json")) {
+    res.json({error: "404 Not Found"})
+  } else {
+    res.type("txt").send("404 Not Found")
+  }
+})
 
 const httpServer = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`)

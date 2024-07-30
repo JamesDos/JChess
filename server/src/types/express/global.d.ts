@@ -1,11 +1,11 @@
 export {}
 
-import { Username } from "../custom";
+import { Username, userToken } from "../custom";
 
 declare global {
   namespace Express {
     export interface Request {
-      username: string
+      user?: userToken
     }
   }
 }

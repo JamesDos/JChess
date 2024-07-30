@@ -14,7 +14,7 @@ export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     if (err) {
       return res.sendStatus(403) // token no longer valid (forbidden)
     }
-    req.username = (decoded as userToken).username
+    req.user = (decoded as userToken)
     next()
   })
 }
