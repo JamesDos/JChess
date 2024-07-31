@@ -11,12 +11,12 @@ export const handleLogin =  async (req: Request, res: Response) => {
     if (await bcrypt.compare(req.body.password, user.password)) {
       // Create JWTs
       const accessToken = jwt.sign(
-        {"username": user.userName},
+        {"username": user.username},
         process.env.ACCESS_TOKEN_SECRET as string,
         { expiresIn: "30s"}
       )
       const refreshToken = jwt.sign(
-        {"username": user.userName},
+        {"username": user.username},
         process.env.REFRESH_TOKEN_SECRET as string,
         { expiresIn: "1d"}
       )

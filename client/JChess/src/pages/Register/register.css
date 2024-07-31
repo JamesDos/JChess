@@ -1,0 +1,45 @@
+.register-page {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 32px;
+  min-height: 60%;
+  min-width: 20%;
+  background-color: var(--display-background);
+  border-radius: 5%;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.register-form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.register-form input {
+  height: 30px;
+  border: none;
+  text-indent: 4px;
+}
+
+.hidden {
+  display: none;
+  background-color: red;
+}
+
+.btn-signup {
+  height: 45px;
+  border: none;
+  border-radius: 8px;
+  color: var(--word-color);
+}

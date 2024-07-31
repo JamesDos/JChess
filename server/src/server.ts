@@ -12,7 +12,9 @@ import registerRouter from "./routes/register";
 import authRouter from "./routes/auth";
 import refreshTokenRouter from "./routes/refresh";
 import logoutRouter from "./routes/logout";
-import { verifyJWT } from "./middleware/verifyJWT";
+import verifyJWT from "./middleware/verifyJWT";
+import credentials from "./middleware/credentials";
+import corsOptions from "./config/corsOptions";
 
 const PORT = process.env.PORT;
 const app = express();
@@ -29,7 +31,9 @@ const db = mongoose.connection
 db.on("error", (error) => console.error(error))
 db.once("open", () => console.log("Connected to Database"))
 
-app.use(cors())
+
+app.use(credentials)
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
 
@@ -44,7 +48,7 @@ app.use("/logout", logoutRouter)
 
 
 // protected routes
-app.use(verifyJWT)
+// app.use(verifyJWT)
 app.use("/users", usersRouter)
 app.use("/games", gamesRouter)
 

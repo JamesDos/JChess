@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import axios from "../../api/axios";
+import axiosInstance from "../../api/axios";
+import axios from "axios";
+import "./register.css";
+import { Link } from "react-router-dom";
 
 // username must be 4 - 24 chars long, start with lowercase letter
-const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{4, 24}$/
+const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/
 /**pwd must be 8-24 chars long, contain at least 1: 
  * - lowercase letter
  * - uppercase letter
  * - special character from [!@#$%]
  * - number
 */
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8, 24}$/
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/
 const REGISTER_URL = "./register"
 
 export const Register = () => {
@@ -48,11 +51,10 @@ export const Register = () => {
       setErrMsg("Invalid Form Data")
       return
     }
-    return
     try {
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         REGISTER_URL,
-        JSON.stringify({userName: username, password: pwd}),
+        JSON.stringify({username: username, password: pwd}),
         {
           headers: {"Content-Type": "application/json"},
           withCredentials: true
@@ -61,18 +63,20 @@ export const Register = () => {
       console.log(res.data)
       setSuccess(true)
     } catch(err: unknown) {
-      if (!err?.response) {
-        setErrMsg("No Server Response")
-      } else if (err.response?.status === 409) {
-        setErrMsg("Username Taken!")
-      } else {
-        setErrMsg("Registration Failed")
+      if (axios.isAxiosError(err)) {
+        if (!err?.response) {
+          setErrMsg("No Server Response")
+        } else if (err.response?.status === 409) {
+          setErrMsg("Username Taken!")
+        } else {
+          setErrMsg("Registration Failed")
+        }
       }
     }
   }
 
   return (
-    <>
+    <div className="register-page">
       {success ? (
         <section className="register-success-container">
           <p>Success!</p>
@@ -81,60 +85,69 @@ export const Register = () => {
       ) : (
       <section className="register-container">
         <p className={!errMsg? "err-msg" : "hidden"}>{errMsg}</p>
-        <h1>Register</h1>
-        <form onSubmit={handleSubmit}> 
+        <h1>Sign Up</h1>
+        <form className="register-form" onSubmit={handleSubmit}> 
 
-          <label htmlFor="register-username">Username:</label>
-          <input 
-            type="text" 
-            id="register-username"
-            autoComplete="off"
-            required
-            onChange={e => setUsername(e.target.value)}
-          />
-          <p className={!validUsername ? "instructions" : "hidden"}>
-            Username must be 4-24 characters.<br />
-            Must begin with a letter.<br />
-            Letters, numbers, hyphens, and underscores allowed.
-          </p>
-
-          <label htmlFor="register-pwd">Password:</label>
-          <input 
-            type="password" 
-            id="register-pwd"
-            required
-            onChange={e => setPwd(e.target.value)}
-          />
-          <p className={!validPwd ? "instructions" : "hidden"}>
-            Password must be 8-24 characters.<br />
-            Must contain at least 1 capital, lowercase, number and special character.<br />
-            Allowed special characters: !@#$%
-          </p>
-
-          <label htmlFor="register-confirm-pwd">Confirm Password:</label>
-          <input 
-            type="password" 
-            id="register-confirm-pwd"
-            required
-            onChange={e => setConfirmPwd(e.target.value)}
-          />
-          <p className={!validConfirmPwd? "instructions" : "hidden"}>
-            Passwords must match<br />
-          </p>
-
-          <button
-            disabled={(!validUsername || !validPwd || !validConfirmPwd) ? true :  false}
-            className="btn-signup"
-          >Sign Up</button>
-        </form>
-        <p>Already registered?<br />
-          <div className="signin-link-container">
-            {/** Put react router link here */}
+          <div>
+            <label htmlFor="register-username">Username:</label>
+            <input 
+              type="text" 
+              id="register-username"
+              autoComplete="off"
+              required
+              onChange={e => setUsername(e.target.value)}
+            />
+            <p className={username && !validUsername ? "instructions" : "hidden"}>
+              Username must be 4-24 characters.<br />
+              Must begin with a letter.<br />
+              Letters, numbers, hyphens, and underscores allowed.
+            </p>
           </div>
 
+          <div>
+            <label htmlFor="register-pwd">Password:</label>
+            <input 
+              type="password" 
+              id="register-pwd"
+              required
+              onChange={e => setPwd(e.target.value)}
+            />
+            <p className={pwd && !validPwd ? "instructions" : "hidden"}>
+              Password must be 8-24 characters.<br />
+              Must contain at least 1 capital, lowercase, number and special character.<br />
+              Allowed special characters: !@#$%
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="register-confirm-pwd">Confirm Password:</label>
+            <input 
+              type="password" 
+              id="register-confirm-pwd"
+              required
+              onChange={e => setConfirmPwd(e.target.value)}
+            />
+            <p className={!validConfirmPwd? "instructions" : "hidden"}>
+              Passwords must match<br />
+            </p>
+          </div>
+
+          <div>
+            <button
+              disabled={(!validUsername || !validPwd || !validConfirmPwd) ? true :  false}
+              className="btn-signup"
+            >Sign Up</button>
+          </div>
+
+        </form>
+
+        <p>Already registered?<br />
+          <Link to="/login">
+            Log In
+          </Link>
         </p>
       </section>
       )}
-    </>
+    </div>
   )
 }

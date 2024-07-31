@@ -11,7 +11,7 @@ import { GameSetUpProvider } from "./contexts/GameSetUpProvider";
 const App = () => {
 
   return (
-    <div className="app">
+    <main className="app">
       <AuthProvider>
         <Routes>
           <Route path="/register" element={<Register/>}/>
@@ -25,7 +25,7 @@ const App = () => {
           </Route>
         </Routes>
       </AuthProvider>
-    </div>
+    </main>
   )
 }
 

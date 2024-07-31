@@ -19,7 +19,7 @@ export const handleRefresh = async (req: Request, res: Response) => {
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET as string,
     (err, decoded) => {
-      if (err || user?.userName !== (decoded as userToken).username) {
+      if (err || user?.username !== (decoded as userToken).username) {
         return res.sendStatus(403)
       }
       // make new acess token

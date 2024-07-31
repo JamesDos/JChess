@@ -4,7 +4,7 @@ import User from "../models/user";
 export const getUserByUsername = async (req: Request, res: Response, next: NextFunction) => {
   let user;
   try {
-    user = await User.findOne({userName: req.body.userName})
+    user = await User.findOne({username: req.body.username})
     if (user === null) {
       return res.status(404).json({message: "Cannot find user"})
     }

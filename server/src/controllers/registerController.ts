@@ -7,14 +7,16 @@ export const handleNewUser = async (req: Request, res: Response) => {
   /* Creates a new user **/
   try {
     // Check for duplicate usernames
-    const existingUser = await User.find({userName: req.body.userName})
-    // where("userName").equals(req.body.userName)
+    const existingUser = await User.find({username: req.body.username})
+    console.log(`Body is ${req.body}`)
     if (existingUser.length > 0) {
-      return res.status(409).json({message: "userName taken!"})
+      console.log(`Username is ${req.body.username}`)
+      console.log(existingUser)
+      return res.status(409).json({message: "username taken!"})
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
     const user = new User({
-      userName: req.body.userName,
+      username: req.body.username,
       password: hashedPassword
     })
     const newUser = await user.save()
