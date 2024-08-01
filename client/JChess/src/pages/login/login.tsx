@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthProvider";
 import "./login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axios";
 import axios from "axios";
 
@@ -10,11 +10,14 @@ const LOGIN_URL = "./login"
 
 export const Login = () => {
   const { setAuth } = useAuth()
+  const navigate = useNavigate()
+
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
   const [errMsg, setErrMsg] = useState("")
+
 
   const handleReset = () => {
     setUsername("")
@@ -41,6 +44,7 @@ export const Login = () => {
       const accessToken = response?.data?.accessToken
       setAuth({username, password, accessToken })
       handleReset()
+      navigate("/")
 
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -60,6 +64,7 @@ export const Login = () => {
   return (
     <div className="login-page">
       <section className="login-container">
+      <p className={!errMsg? "err-msg" : "hidden"}>{errMsg}</p>
         <h1>Login</h1>
         <form className="login-form" onSubmit={handleSubmit}>
 

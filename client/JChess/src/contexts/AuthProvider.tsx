@@ -1,14 +1,36 @@
 import { createContext, useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-const AuthContext = createContext(null)
+const AuthContext = createContext<AuthContextType | null>(null)
 
 export const useAuth = () => {
-  return useContext(AuthContext)
+  const context = useContext(AuthContext)
+  if (context === null) {
+    throw new Error("useAuth must be used within an AuthProvider!")
+  }
+  return context
 }
 
+interface AuthContextType {
+  username: string,
+  password: string,
+  accessToken: string
+  setAuth: React.Dispatch<React.SetStateAction<AuthStateType | null>>
+}
+
+interface AuthStateType {
+  username: string,
+  password: string,
+  accessToken: string
+}
+
+// const defaultAuth: AuthStateType = {
+//   username: "",
+//   password: "",
+//   accessToken: ""
+// }
+
 export const AuthProvider = ({children}: {children: React.ReactNode}) => {
-  const [auth, setAuth] = useState({})
+  const [auth, setAuth] = useState<AuthStateType | null >(null)
   // const [user, setUser] = useState({name: "", isAuthenticated: false})
   // const [token, setToken] = useState(true)
 
@@ -22,7 +44,12 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   // }
 
   return (
-    <AuthContext.Provider value={{auth, setAuth}}>
+    <AuthContext.Provider value={
+      { username: auth?.username || "", 
+        password: auth?.password || "", 
+        accessToken: auth?.accessToken || "",
+        setAuth
+      }}>
       {children}
     </AuthContext.Provider>
   )
