@@ -7,6 +7,7 @@ import { Home } from "./pages/Home/home";
 import { PrivateRoutes } from "./utils/PrivateRoutes";
 import { AuthProvider } from "./contexts/AuthProvider";
 import { GameSetUpProvider } from "./contexts/GameSetUpProvider";
+import PersistLogin from "./utils/persistLogin";
 
 const App = () => {
 
@@ -17,10 +18,12 @@ const App = () => {
           <Route path="/register" element={<Register/>}/>
           <Route path="/login" element={<Login/> }/>
           <Route element={<PrivateRoutes/>}>
-            <Route path="/" element={<Home/>}/>
-            <Route element={<GameSetUpProvider><Outlet/></GameSetUpProvider>}>
-              <Route path="/lobby" element={<Lobby/>}/>
-              <Route path="/game" element={<Game/>}/>
+            <Route element={<PersistLogin/>}>
+              <Route path="/" element={<Home/>}/>
+              <Route element={<GameSetUpProvider><Outlet/></GameSetUpProvider>}>
+                <Route path="/lobby" element={<Lobby/>}/>
+                <Route path="/game" element={<Game/>}/>
+              </Route>
             </Route>
           </Route>
         </Routes>

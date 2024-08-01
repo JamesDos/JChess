@@ -1,16 +1,8 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useState } from "react";
 
-const AuthContext = createContext<AuthContextType | null>(null)
+export const AuthContext = createContext<AuthContextType | null>(null)
 
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (context === null) {
-    throw new Error("useAuth must be used within an AuthProvider!")
-  }
-  return context
-}
-
-interface AuthContextType {
+export interface AuthContextType {
   username: string,
   password: string,
   accessToken: string
@@ -23,25 +15,14 @@ interface AuthStateType {
   accessToken: string
 }
 
-// const defaultAuth: AuthStateType = {
-//   username: "",
-//   password: "",
-//   accessToken: ""
-// }
+const defaultAuth: AuthStateType = {
+  username: "",
+  password: "",
+  accessToken: ""
+}
 
 export const AuthProvider = ({children}: {children: React.ReactNode}) => {
-  const [auth, setAuth] = useState<AuthStateType | null >(null)
-  // const [user, setUser] = useState({name: "", isAuthenticated: false})
-  // const [token, setToken] = useState(true)
-
-  // const login = (userName: string, password: string) => {
-  //   // TODO: Call Auth API to validate userName and password
-  //   console.log(`${userName} ${password}`)
-  // }
-
-  // const logout = () => {
-  //   setUser(prevUser => ({...prevUser, isAuthenticated: false}))
-  // }
+  const [auth, setAuth] = useState<AuthStateType | null >(defaultAuth)
 
   return (
     <AuthContext.Provider value={
