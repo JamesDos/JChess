@@ -9,6 +9,7 @@ const PersistLogin = () => {
   const auth = useAuth()
 
   useEffect(() => {
+    let isMounted = true
     const verifyRefreshToken = async () => {
       try {
         await refesh()
@@ -17,12 +18,16 @@ const PersistLogin = () => {
         console.log(err)
       }
       finally {
-        setIsLoading(false)
+        isMounted && setIsLoading(false)
       }
     }
     // only verify refresh token when we don't have access token
+    console.log(`In persist login ${!auth?.accessToken}`)
     !auth?.accessToken ? verifyRefreshToken() : setIsLoading(false)
     
+    return () => {
+      isMounted = false
+    }
   }, [refesh, auth])
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import User from "../models/user";
 import { Request, Response } from "express";
 
 export const handleLogout = async (req: Request, res: Response) => {
+  console.log("In logout")
   const cookies = req.cookies
   if (!cookies?.jwt) {
     return res.sendStatus(204) // No content

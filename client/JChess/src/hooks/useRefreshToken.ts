@@ -14,6 +14,7 @@ const useRefreshToken = () => {
       password: prev?.password || "", 
       accessToken: response.data.accessToken,
     }))
+    console.log(`Response is ${response.data.accessToken}`)
     return response.data.accessToken
   }
 
