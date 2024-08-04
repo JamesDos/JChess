@@ -13,7 +13,7 @@ export const useGameSetUp = () => {
 }
 
 interface Player {
-  id: string
+  socketId: string
 }
 
 interface gameContextType {
@@ -26,7 +26,7 @@ interface gameContextType {
 interface gameSetupType {
   room: string,
   orientation: BoardOrientation | string,
-  players: {id: string}[],
+  players: {socketId: string}[],
 }
 
 type Action = 
@@ -77,7 +77,7 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
     socket.on("opponent-joined", (roomData) => {
       console.log("effect called")
       console.log("roomData", roomData)
-      dispatch({type: "update-players", newPlayers: roomData.players})
+      dispatch({type: "update-players", newPlayers: roomData.playerSocketIds})
     });
   }, [])
 

@@ -109,6 +109,7 @@ export const Game = () => {
       console.log("Not your turn!")
       return false // prevents players from moving other player's pieces
     }
+    console.log(players)
     if (players.length < 2) { // prevents move if both players not connected
       console.log(players)
       console.log("At least one player has not connected")

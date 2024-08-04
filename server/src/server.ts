@@ -15,6 +15,8 @@ import logoutRouter from "./routes/logout";
 import verifyJWT from "./middleware/verifyJWT";
 import credentials from "./middleware/credentials";
 import corsOptions from "./config/corsOptions";
+import Room from "./models/room";
+// import { createClient } from "redis";
 
 const PORT = process.env.PORT;
 const app = express();
@@ -31,6 +33,16 @@ const db = mongoose.connection
 db.on("error", (error) => console.error(error))
 db.once("open", () => console.log("Connected to Database"))
 
+// const redisClient = createClient({
+//     password: process.env.REDIS_PWD,
+//     socket: {
+//         host: 'redis-13928.c16.us-east-1-2.ec2.redns.redis-cloud.com',
+//         port: 13928
+//     }
+// });
+
+// redisClient.on('error', (err) => console.log('Redis Client Error', err));
+// await redisClient.connect();
 
 app.use(credentials)
 app.use(cors(corsOptions))
@@ -48,7 +60,7 @@ app.use("/logout", logoutRouter)
 
 
 // protected routes
-app.use(verifyJWT)
+// app.use(verifyJWT)
 app.use("/users", usersRouter)
 app.use("/games", gamesRouter)
 
@@ -76,49 +88,97 @@ export const io = new Server(httpServer, {
 
 io.on("connection", (socket: Socket) => {
   socket.on("create-room", async (cb) => {
-    const roomId = uuidv4() // create new room with roomId
-    await socket.join(roomId)
-    rooms.set(roomId, { // update rooms map to include new room
-      roomId, 
-      players: [{id: socket.id}]
-    })
-    cb(roomId)
+    try {
+      const roomId = uuidv4() // create new room with roomId
+      await socket.join(roomId)
+
+      const newRoom = new Room({
+        roomId: roomId,
+        playerSocketIds: [{socketId: socket.id}]
+      })
+
+      rooms.set(roomId, { // update rooms map to include new room
+        roomId, 
+        players: [{id: socket.id}]
+      })
+
+      await newRoom.save()
+      cb(roomId)
+    } catch (err) {
+      console.error(err)
+      cb(null, err)
+    }
   })
   socket.on("join-room", async (roomData, cb) => {
-    console.log(`RoomId is ${roomData.roomId}`)
-    const room = rooms.get(roomData.roomId)
-    let error, message;
-    if (!room) { // if room does not exist send error through callback
-      error = true;
-      message = 'room does not exist';
-    } else if (room.length <= 0) { // room is empty
-      error = true;
-      message = 'room is empty';
-    } else if (room.length >= 2) { // room is full
-      error = true;
-      message = 'room is full';
-    }
-    if (error) {
-      // if there's an error, check if the client passed a callback,
-      // call the callback (if it exists) with an error object and exit or 
-      // just exit if the callback is not given
-      if (cb) { // if user passed a callback, call it with an error payload
-        cb({
-          error,
-          message
-        });
+    try {
+      const room = await Room.findOne({roomId: roomData.roomId})
+      let error, message;
+      if (!room) { // if room does not exist send error through callback
+        error = true;
+        message = 'room does not exist';
+      } else if (room.playerSocketIds.length <= 0) { // room is empty
+        error = true;
+        message = 'room is empty';
+      } else if (room.playerSocketIds.length >= 2) { // room is full
+        error = true;
+        message = 'room is full';
       }
-      return
+      if (error) {
+        // if there's an error, check if the client passed a callback,
+        // call the callback (if it exists) with an error object and exit or 
+        // just exit if the callback is not given
+        if (cb) { // if user passed a callback, call it with an error payload
+          cb({
+            error,
+            message
+          });
+        }
+        return
+      }
+      await socket.join(roomData.roomId)
+      room?.playerSocketIds.push({socketId: socket.id})
+      const updatedRoom = await room?.save()
+      cb(updatedRoom)
+      console.log(`Emitting opponent join to ${roomData.roomId}`)
+      socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
+    } catch (err) {
+      console.error(err)
+      cb(null, err)
     }
-    await socket.join(roomData.roomId)
-    const updatedRoom = {
-      ...room, 
-      players: [...room.players, {id: socket.id}]
-    }
-    rooms.set(roomData.id, updatedRoom)
-    cb(updatedRoom) // pass room details to client
-    console.log(`Emitting opponent join to ${roomData.roomId}`)
-    socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
+
+    // const room = rooms.get(roomData.roomId)
+    // let error, message;
+    // if (!room) { // if room does not exist send error through callback
+    //   error = true;
+    //   message = 'room does not exist';
+    // } else if (room.length <= 0) { // room is empty
+    //   error = true;
+    //   message = 'room is empty';
+    // } else if (room.length >= 2) { // room is full
+    //   error = true;
+    //   message = 'room is full';
+    // }
+    // if (error) {
+    //   // if there's an error, check if the client passed a callback,
+    //   // call the callback (if it exists) with an error object and exit or 
+    //   // just exit if the callback is not given
+    //   if (cb) { // if user passed a callback, call it with an error payload
+    //     cb({
+    //       error,
+    //       message
+    //     });
+    //   }
+    //   return
+    // }
+    // await socket.join(roomData.roomId)
+    // const updatedRoom = {
+    //   ...room, 
+    //   players: [...room.players, {id: socket.id}]
+    // }
+    // rooms.set(roomData.id, updatedRoom)
+    // cb(updatedRoom) // pass room details to client
+    // console.log(`Emitting opponent join to ${roomData.roomId}`)
+    // socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
   })
   socket.on("move", (moveData) => {
     console.log(`Sent move to Room ${moveData.room}`)
