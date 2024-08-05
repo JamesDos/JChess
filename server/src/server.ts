@@ -5,18 +5,30 @@ import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
+
+// Databases
 import mongoose from "mongoose";
+// import { createClient } from "redis";
+
+// Routes
 import usersRouter from "./routes/users"; 
 import gamesRouter from "./routes/games";
 import registerRouter from "./routes/register";
 import authRouter from "./routes/auth";
 import refreshTokenRouter from "./routes/refresh";
 import logoutRouter from "./routes/logout";
+
+
+// middleware
 import verifyJWT from "./middleware/verifyJWT";
 import credentials from "./middleware/credentials";
 import corsOptions from "./config/corsOptions";
+
+// Sockets
 import Room from "./models/room";
-// import { createClient } from "redis";
+import roomHandler from "./sockets/roomHandler";
+import chessHandler from "./sockets/chessHandler";
+
 
 const PORT = process.env.PORT;
 const app = express();
@@ -60,7 +72,7 @@ app.use("/logout", logoutRouter)
 
 
 // protected routes
-// app.use(verifyJWT)
+app.use(verifyJWT)
 app.use("/users", usersRouter)
 app.use("/games", gamesRouter)
 
@@ -78,7 +90,7 @@ const httpServer = app.listen(PORT, () => {
 })
 
 // maps socketIds to list of players in the game that player with socketId is in
-const rooms = new Map(); 
+// const rooms = new Map(); 
 
 export const io = new Server(httpServer, {
   cors: {
@@ -86,128 +98,29 @@ export const io = new Server(httpServer, {
   }
 });
 
+const {
+  createRoom,
+  joinRoom,
+  handleDisconnect,
+  closeRoom,
+} = roomHandler(io)
+
+const {
+  makeMove,
+  handleResign
+} = chessHandler(io)
+
+
 io.on("connection", (socket: Socket) => {
-  socket.on("create-room", async (cb) => {
-    try {
-      const roomId = uuidv4() // create new room with roomId
-      await socket.join(roomId)
+  // Room handlers
+  socket.on("create-room", createRoom)
+  socket.on("join-room", joinRoom)
+  socket.on("disconnect", handleDisconnect)
+  socket.on("close-room", closeRoom)
 
-      const newRoom = new Room({
-        roomId: roomId,
-        playerSocketIds: [{socketId: socket.id}]
-      })
-
-      rooms.set(roomId, { // update rooms map to include new room
-        roomId, 
-        players: [{id: socket.id}]
-      })
-
-      await newRoom.save()
-      cb(roomId)
-    } catch (err) {
-      console.error(err)
-      cb(null, err)
-    }
-  })
-  socket.on("join-room", async (roomData, cb) => {
-    try {
-      const room = await Room.findOne({roomId: roomData.roomId})
-      let error, message;
-      if (!room) { // if room does not exist send error through callback
-        error = true;
-        message = 'room does not exist';
-      } else if (room.playerSocketIds.length <= 0) { // room is empty
-        error = true;
-        message = 'room is empty';
-      } else if (room.playerSocketIds.length >= 2) { // room is full
-        error = true;
-        message = 'room is full';
-      }
-      if (error) {
-        // if there's an error, check if the client passed a callback,
-        // call the callback (if it exists) with an error object and exit or 
-        // just exit if the callback is not given
-        if (cb) { // if user passed a callback, call it with an error payload
-          cb({
-            error,
-            message
-          });
-        }
-        return
-      }
-      await socket.join(roomData.roomId)
-      room?.playerSocketIds.push({socketId: socket.id})
-      const updatedRoom = await room?.save()
-      cb(updatedRoom)
-      console.log(`Emitting opponent join to ${roomData.roomId}`)
-      socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
-    } catch (err) {
-      console.error(err)
-      cb(null, err)
-    }
-
-    // const room = rooms.get(roomData.roomId)
-    // let error, message;
-    // if (!room) { // if room does not exist send error through callback
-    //   error = true;
-    //   message = 'room does not exist';
-    // } else if (room.length <= 0) { // room is empty
-    //   error = true;
-    //   message = 'room is empty';
-    // } else if (room.length >= 2) { // room is full
-    //   error = true;
-    //   message = 'room is full';
-    // }
-    // if (error) {
-    //   // if there's an error, check if the client passed a callback,
-    //   // call the callback (if it exists) with an error object and exit or 
-    //   // just exit if the callback is not given
-    //   if (cb) { // if user passed a callback, call it with an error payload
-    //     cb({
-    //       error,
-    //       message
-    //     });
-    //   }
-    //   return
-    // }
-    // await socket.join(roomData.roomId)
-    // const updatedRoom = {
-    //   ...room, 
-    //   players: [...room.players, {id: socket.id}]
-    // }
-    // rooms.set(roomData.id, updatedRoom)
-    // cb(updatedRoom) // pass room details to client
-    // console.log(`Emitting opponent join to ${roomData.roomId}`)
-    // socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
-  })
-  socket.on("move", (moveData) => {
-    console.log(`Sent move to Room ${moveData.room}`)
-    socket.to(moveData.room).emit("move", moveData.move)
-  })
-  socket.on("disconnect", () => {
-    const gameRooms = Array.from(rooms.values()) // list of all game rooms
-    gameRooms.forEach(room => {
-      // find which rooms the disconnected client joined using socket's id
-      const userInRoom = room.players.find((player: {id: string}) => player.id === socket.id)
-      if (userInRoom) {
-        if (room.players.length < 2) {
-          rooms.delete(room.roomId)
-          return 
-        }
-      }
-      // emit to all clients in room that player disconnected
-      socket.to(room.roomId).emit("player-disconnected", userInRoom)
-    })
-  })
-  socket.on("close-room", async (data) => {
-    socket.to(data.roomId).emit("close-room", data)
-    const clientSockets = await io.in(data.roomId).fetchSockets() // get array of all sockets in room
-    clientSockets.forEach(s => {
-      s.leave(data.roomId) // force socket to leave room
-    })
-    rooms.delete(data.roomId)
-  })
-  
+  // Chess handlers
+  socket.on("move", makeMove)
+  socket.on("resign", handleResign)
 });
 
 

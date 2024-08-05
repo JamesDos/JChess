@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { userToken } from "../types/custom";
 
 export const handleRefresh = async (req: Request, res: Response) => {
-  console.log("In refresh")
   const cookies = req.cookies
   if (!cookies?.jwt) {
     return res.sendStatus(401)

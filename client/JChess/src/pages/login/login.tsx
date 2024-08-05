@@ -101,7 +101,7 @@ export const Login = () => {
         </form>
 
         <p>Need an account?<br />
-        <Link to="/register ">
+          <Link to="/register ">
             Sign Up
           </Link>
         </p>

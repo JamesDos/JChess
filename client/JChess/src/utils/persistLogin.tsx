@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import useRefreshToken from "../hooks/useRefreshToken";
 import useAuth from "../hooks/useAuth";
 
@@ -22,7 +22,6 @@ const PersistLogin = () => {
       }
     }
     // only verify refresh token when we don't have access token
-    console.log(`In persist login ${!auth?.accessToken}`)
     !auth?.accessToken ? verifyRefreshToken() : setIsLoading(false)
     
     return () => {
@@ -30,10 +29,10 @@ const PersistLogin = () => {
     }
   }, [refesh, auth])
 
-  useEffect(() => {
-    console.log(`isLoading: ${isLoading}`)
-    console.log(`authToken: ${JSON.stringify(auth?.accessToken)}`)
-  }, [isLoading, auth])
+  // useEffect(() => {
+  //   console.log(`isLoading: ${isLoading}`)
+  //   console.log(`authToken: ${JSON.stringify(auth?.accessToken)}`)
+  // }, [isLoading, auth])
 
   return (
     <>

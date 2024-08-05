@@ -1,22 +1,15 @@
-import React, { useReducer, useEffect, useContext, createContext} from "react";
+import React, { useReducer, useEffect, createContext} from "react";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import socket from "../connections/socket";
+import { useNavigate } from "react-router-dom";
 
-const GameSetUpContext = createContext<gameContextType | null>(null)
-
-export const useGameSetUp = () => {
-  const context = useContext(GameSetUpContext)
-  if (context === null) {
-    throw new Error("useGameSetUp must be used within a GameSetUpProvider!")
-  }
-  return context
-}
+export const GameSetUpContext = createContext<gameContextType | null>(null)
 
 interface Player {
   socketId: string
 }
 
-interface gameContextType {
+export interface gameContextType {
   room: string,
   orientation: BoardOrientation | string,
   players: Player[],
@@ -72,14 +65,16 @@ const reducer = (state: gameSetupType, action: Action) => {
 
 export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   const [gameSetUpData, dispatch] = useReducer(reducer, {room: "", orientation:"", players:[]})
+  const navigate = useNavigate()
 
   useEffect(() => {
     socket.on("opponent-joined", (roomData) => {
       console.log("effect called")
       console.log("roomData", roomData)
       dispatch({type: "update-players", newPlayers: roomData.playerSocketIds})
+      navigate("/game")
     });
-  }, [])
+  }, [navigate])
 
   return (
     <GameSetUpContext.Provider value={{...gameSetUpData, dispatch}}>

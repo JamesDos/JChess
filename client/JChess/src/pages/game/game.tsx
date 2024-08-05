@@ -4,7 +4,8 @@ import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
 import { Chess, Square, Move, Color} from 'chess.js';
 import socket from "../../connections/socket";
-import { useGameSetUp } from "../../contexts/GameSetUpProvider";
+import useGameSetUp from "../../hooks/useGameSetUp";
+import { useNavigate } from "react-router-dom";
 import './game.css';
 
 import moveSound from "../../assets/audio/move-self.mp3";
@@ -14,14 +15,14 @@ import promoteSound from "../../assets/audio/promote.mp3";
 import checkSound from "../../assets/audio/move-check.mp3";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
-export interface GameProps {
-  room: string, 
-  orientation: BoardOrientation | string, 
-  players: {id: string}[],
-  cleanup: () => void,
-}
+// export interface GameProps {
+//   room: string, 
+//   orientation: BoardOrientation | string, 
+//   players: {id: string}[],
+//   cleanup: () => void,
+// }
 
-export interface moveData {
+interface moveData {
   from: string,
   to: string, 
   color: Color, 
@@ -49,12 +50,14 @@ export const Game = () => {
   const [playPromoteSound] = useSound(promoteSound)
   const [playCheckSound] = useSound(checkSound)
 
-  // Move Functions
+  const navigate = useNavigate()
 
+  // Move Functions
   const checkGameOver = useCallback(() => {
     if (chess.isGameOver()) {
       if (chess.isCheckmate()) {
         setOver(`Checkmate! ${chess.turn() === "w" ? "black": "white"} wins!`)
+        console.log(chess.pgn())
       } else if (chess.isDraw()) {
         setOver(`Draw!`)
       } else {
@@ -125,18 +128,34 @@ export const Game = () => {
     if (move === null) {
       return false
     }
-    socket.emit("move", { move: move, room: room})
+    socket.emit("move", { move: move, roomId: room })
     return true
   }
 
-  // Effects
+  const handleResign = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const loser = orientation 
+    const winner = (orientation === "white" ? "black": "white")
+    const message = `${loser} resigns! ${winner} wins!`
+    setOver(message)
+    chess.setComment(`${loser} resigns`)
+    socket.emit("resign", {roomId: room, message: message})
+  }
 
+  // Effects
   useEffect(() => {
     socket.on("move", (move) => {
       console.log(`move is ${move}`)
       makeMove(move)
     })
   }, [makeMove])
+
+  useEffect(() => {
+    socket.on("opponent-resign", (message) => {
+      setOver(message)
+      setDraggable(false)
+    })
+  }, [])
 
   useEffect(() => {
     socket.on("player-disconnected", (player) => {
@@ -149,14 +168,10 @@ export const Game = () => {
       if (roomId === room) {
         dispatch({type: "cleanup-room"})
       }
-      // if (roomId === props.room) { // check if id of close room is same as current room
-      //   props.cleanup()
-      // }
     })
   }, [dispatch, room])
 
   // Helper functions for event handlers
-
   const handleSetBoardToPos = (pos: string) => {
     setDisplayPosition(pos)
     setDraggable(pos === position)
@@ -177,7 +192,6 @@ export const Game = () => {
   }
 
   // Event handlers
-
   const handleDropPiece = (sourceSquare: Square, targetSquare: Square) => {
     const madeMove = handleMakeMove(sourceSquare, targetSquare)
     if (dottedSquares.includes(targetSquare)) {
@@ -223,6 +237,11 @@ export const Game = () => {
     return styles
   }
 
+  const handleBackToLobby = (e: React.MouseEvent) => {
+    e.preventDefault()
+    navigate("/lobby")
+  }
+
   return (
     <div className="game">
       <div className="board">
@@ -244,9 +263,15 @@ export const Game = () => {
         setSelectedMoveNum={setMoveCount}
         resetSquares={resetHighlightedSquares}
         />
-      <div className="game-result-container">
-        {over}
-      </div>
+      {over === "" 
+        ?  
+        <button onClick={handleResign}>Resign</button>
+        :
+       <div className="game-result-container">
+          {over}
+          <button onClick={handleBackToLobby}>Back to Lobby</button>
+        </div>
+      }
     </div>
   )
 }
