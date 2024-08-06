@@ -5,6 +5,9 @@ import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
+import { gameManager } from "./chessManager/gameManager";
+import { User } from "./chessManager/SocketManager";
+import registerGameHandlers from "./chessManager/gameHandler";
 
 // Databases
 import mongoose from "mongoose";
@@ -110,18 +113,26 @@ const {
   handleResign
 } = chessHandler(io)
 
+const onConnection = (socket: Socket) => {
+  console.log('New client connected');
+  registerGameHandlers(io, socket)
+}
 
-io.on("connection", (socket: Socket) => {
-  // Room handlers
-  socket.on("create-room", createRoom)
-  socket.on("join-room", joinRoom)
-  socket.on("disconnect", handleDisconnect)
-  socket.on("close-room", closeRoom)
+io.on("connection", onConnection)
 
-  // Chess handlers
-  socket.on("move", makeMove)
-  socket.on("resign", handleResign)
-});
+// io.on("connection", (socket: Socket) => {
+
+
+//   // Room handlers
+//   // socket.on("create-room", createRoom)
+//   // socket.on("join-room", joinRoom)
+//   // socket.on("disconnect", handleDisconnect)
+//   // socket.on("close-room", closeRoom)
+
+//   // // Chess handlers
+//   // socket.on("move", makeMove)
+//   // socket.on("resign", handleResign)
+// });
 
 
 

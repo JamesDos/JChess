@@ -18,18 +18,19 @@ export const Lobby = () => {
 
   const navigate = useNavigate()
 
-  const createRoom = useCallback( (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const createRoom = useCallback( (e: React.MouseEvent) => {
     e.preventDefault()
-    socket.emit("create-room", (room: string) => {
+    socket.emit("create-game", (room: string) => {
       console.log(`Created room with id ${room}`)
       dispatch({ type: "create-room", room: room })
       setMakeRoomId(room)
     })
   }, [dispatch]) 
 
-  const joinGame = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const joinGame = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     socket.emit("join-room", {roomId: joinRoomId}, (res: any) => {
+      // TODO: make send res in callback for gameHandler
       if (res.error) {
         console.log(res.message)
         return 

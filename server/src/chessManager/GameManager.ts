@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { Game } from "./Game";
 import { User, socketManager } from "./SocketManager";
+import * as messages from "./messages";
 
 class GameManager {
   private static instance: GameManager
@@ -9,6 +10,7 @@ class GameManager {
 
   constructor() {
     this.games = []
+    this.users = []
   }
 
   static getInstance() {
@@ -19,49 +21,65 @@ class GameManager {
     return GameManager.instance
   }
 
-  // createGame(player1Socket: Socket) {
-  //   const room = socketManager.createRoom(player1Socket.id)
-  //   const game = new Game(player1Socket, room.roomId)
-  //   this.games.push(game)
-  // }
-
-  joinGame(player2Socket: Socket, roomId: string) {
-    const game = this.games.find(game => game.roomId == roomId)
-    if (!game) {
-      console.log("game not found")
-    } else {
-      game.addPlayer2(player2Socket)
-    }
+  addGame(game: Game) {
+    this.games.push(game)
   }
 
-  removeGame(roomId) {
-    this.games = this.games.filter(game => game.roomId != roomId)
+  removeGame(gameId: string) {
+    this.games = this.games.filter(game => game.gameId != gameId)
+  }
+
+  findGame(gameId: string) {
+    return this.games.find(g => g.gameId === gameId)
   }
 
   addUser(user: User) {
     this.users.push(user)
-    this.addHandlers(user)
+  }
+
+  addUserToGame(user: User, gameId: string) {
+    socketManager.addUser(user, gameId)
   }
 
   removeUser(socket: Socket) {
     const user = this.users.find(user => user.socket.id === socket.id)
     if (!user) {
-      console.error("user not founder")
+      console.error("user not founded")
       return
     }
     this.users = this.users.filter(user => user.socket.id !== socket.id)
     socketManager.removeUser(user)
   }
 
-  private addHandlers(user: User) {
+  addHandlers(user: User, io: Server) {
     user.socket.on("create-game", async (data) => {
+      console.log("in create game")
+      const game = new Game(user.id, null)
+      const gameId = game.gameId
+      this.games.push(game)
+      socketManager.addUser(user, gameId)
+      socketManager.broadcast(gameId, "game added")
+    })
+
+    user.socket.on("join-room", async (data) => {
       const gameId = data.gameId
-      
+      const game = this.games.find(g => g.gameId === gameId)
+      if (!game) {
+        console.error("no game with gameId")
+        return
+      }
+      if (game && game.player2UserId === null) {
+        socketManager.addUser(user, game.gameId)
+        game.addPlayer2(user.id)
+        return
+      }
     })
   }
 }
 
 export const gameManager = GameManager.getInstance()
+
+
 
 
 

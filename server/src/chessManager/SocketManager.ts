@@ -4,8 +4,9 @@ export class User {
   public socket: Socket
   public id: string
 
-  constructor(socket: Socket) {
+  constructor(socket: Socket, id: string) {
     this.socket = socket
+    this.id = id
   }
 }
 
@@ -41,6 +42,7 @@ class SocketManager {
 
   broadcast(roomId: string, message: string) {
     const users = this.roomToUsers.get(roomId)
+    console.log(users)
     if (!users) {
       console.error("No users in this room")
       return
@@ -65,8 +67,6 @@ class SocketManager {
     }
     this.userToRoom.delete(user.id)
   }
-
-  
 }
 
 export const socketManager = SocketManager.getInstance()

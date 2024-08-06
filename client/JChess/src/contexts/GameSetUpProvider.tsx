@@ -76,6 +76,14 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
     });
   }, [navigate])
 
+  useEffect(() => {
+    socket.on("message", (message: string) => {
+      if (message === `game initialized`) {
+        navigate("/game")
+      }
+    })
+  }, [navigate])
+
   return (
     <GameSetUpContext.Provider value={{...gameSetUpData, dispatch}}>
       {children}
