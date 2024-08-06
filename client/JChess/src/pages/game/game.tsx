@@ -159,6 +159,7 @@ export const Game = () => {
 
   useEffect(() => {
     socket.on("player-disconnected", (player) => {
+      console.log(`Opponent with id ${player} has disconnected`)
       setOver(`Opponent with id ${player} has disconnected`)
     })
   }, [])
@@ -239,6 +240,7 @@ export const Game = () => {
 
   const handleBackToLobby = (e: React.MouseEvent) => {
     e.preventDefault()
+    socket.emit("close-room", {roomId: room})
     navigate("/lobby")
   }
 

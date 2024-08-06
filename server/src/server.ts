@@ -72,7 +72,7 @@ app.use("/logout", logoutRouter)
 
 
 // protected routes
-app.use(verifyJWT)
+// app.use(verifyJWT)
 app.use("/users", usersRouter)
 app.use("/games", gamesRouter)
 

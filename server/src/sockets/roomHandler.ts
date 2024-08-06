@@ -26,6 +26,7 @@ export default (io: Server) => {
       await newRoom.save()
       cb(roomId)
     } catch (err) {
+      console.log("socket create-room error")
       console.error(err)
       cb(null, err)
     }  
@@ -65,6 +66,7 @@ export default (io: Server) => {
       console.log(`Emitting opponent join to ${roomData.roomId}`)
       socket.to(roomData.roomId).emit("opponent-joined", updatedRoom)
     } catch (err) {
+      console.log("socket join-room error")
       console.error(err)
       cb(null, err)
     }
@@ -89,19 +91,25 @@ export default (io: Server) => {
         $expr: { $lt: [{ $size: "$playerSocketIds" }, 2] }
       })
     } catch (err) {
-      console.log("in disconnect")
+      console.log("socket disconnect error")
       console.error(err)
     }
   }
 
   const closeRoom = async function(this: Socket, data: CloseRoomData) {
-    const socket = this
-    socket.to(data.roomId).emit("close-room", data)
-    const clientSockets = await io.in(data.roomId).fetchSockets() // get array of all sockets in room
-    clientSockets.forEach(s => {
-      s.leave(data.roomId) // force socket to leave room
-    })
-    await Room.deleteOne({roomId: data.roomId})
+    try {
+      const socket = this
+      socket.to(data.roomId).emit("close-room", data)
+      const clientSockets = await io.in(data.roomId).fetchSockets() // get array of all sockets in room
+      clientSockets.forEach(s => {
+        s.leave(data.roomId) // force socket to leave room
+      })
+      await Room.deleteOne({roomId: data.roomId})
+      console.log("sucessfully deleted room")
+    } catch (err) {
+      console.log("socket closeRoom error")
+      console.error(err)
+    }
   }
 
   
