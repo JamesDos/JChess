@@ -3,6 +3,7 @@ import  { gameManager } from './gameManager';
 import { Game } from "./Game"
 import { User } from './SocketManager';
 import { socketManager } from './SocketManager';
+import * as messages from "./messages";
 
 
 const registerGameHandlers = (io: Server, socket: Socket) => {
@@ -15,7 +16,12 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
     const gameId = game.gameId;
     gameManager.addGame(game);
     socketManager.addUser(user, gameId)
-    socketManager.broadcast(gameId, "game added");
+    socketManager.broadcast(gameId, JSON.stringify({
+      type: messages.CREATE_GAME,
+      payload: {
+        gameId: gameId
+      }
+    }));
     cb(gameId)
   });
 
@@ -33,6 +39,19 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       return;
     }
   });
+
+  socket.on("move", async (data) => {
+    console.log("Handler 'move' triggered");
+    console.log(`roomId is ${data.roomId}`)
+    const gameId = data.roomId
+    const game = gameManager.findGame(gameId)
+    if (!game) {
+      console.error("No game with gameId");
+      return;
+    }
+    game.makeMove(user, data.move)
+    return
+  })
 };
 
 export default registerGameHandlers;

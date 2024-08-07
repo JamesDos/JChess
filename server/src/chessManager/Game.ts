@@ -31,7 +31,7 @@ export class Game {
   }
 
   addPlayer2(player2UserId: string) {
-    this.player2UserId = this.player1UserId
+    this.player2UserId = player2UserId
     this.status = "ONGOING"
 
     socketManager.broadcast(
@@ -66,6 +66,7 @@ export class Game {
     }
 
     try {
+      console.log(`received move is ${move}`)
       this.chess.move(move)
     } catch (err) {
       console.error(err)
@@ -75,7 +76,12 @@ export class Game {
       this.gameId,
       JSON.stringify({
         type: MOVE, 
-        payload: move
+        payload: {
+          move: move,
+          history: this.chess.history({verbose: true}),
+          fen: this.chess.fen()
+
+        }
       })
     )
 

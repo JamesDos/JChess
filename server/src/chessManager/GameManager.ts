@@ -51,30 +51,30 @@ class GameManager {
     socketManager.removeUser(user)
   }
 
-  addHandlers(user: User, io: Server) {
-    user.socket.on("create-game", async (data) => {
-      console.log("in create game")
-      const game = new Game(user.id, null)
-      const gameId = game.gameId
-      this.games.push(game)
-      socketManager.addUser(user, gameId)
-      socketManager.broadcast(gameId, "game added")
-    })
+  // addHandlers(user: User, io: Server) {
+  //   user.socket.on("create-game", async (data) => {
+  //     console.log("in create game")
+  //     const game = new Game(user.id, null)
+  //     const gameId = game.gameId
+  //     this.games.push(game)
+  //     socketManager.addUser(user, gameId)
+  //     socketManager.broadcast(gameId, "game added")
+  //   })
 
-    user.socket.on("join-room", async (data) => {
-      const gameId = data.gameId
-      const game = this.games.find(g => g.gameId === gameId)
-      if (!game) {
-        console.error("no game with gameId")
-        return
-      }
-      if (game && game.player2UserId === null) {
-        socketManager.addUser(user, game.gameId)
-        game.addPlayer2(user.id)
-        return
-      }
-    })
-  }
+  //   user.socket.on("join-room", async (data) => {
+  //     const gameId = data.gameId
+  //     const game = this.games.find(g => g.gameId === gameId)
+  //     if (!game) {
+  //       console.error("no game with gameId")
+  //       return
+  //     }
+  //     if (game && game.player2UserId === null) {
+  //       socketManager.addUser(user, game.gameId)
+  //       game.addPlayer2(user.id)
+  //       return
+  //     }
+  //   })
+  // }
 }
 
 export const gameManager = GameManager.getInstance()

@@ -29,14 +29,18 @@ export const Lobby = () => {
 
   const joinGame = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
-    socket.emit("join-room", {roomId: joinRoomId}, (res: any) => {
+    socket.emit("join-room", {roomId: joinRoomId}, (res: string) => {
       // TODO: make send res in callback for gameHandler
-      if (res.error) {
-        console.log(res.message)
-        return 
-      }
-      console.log(res)
-      dispatch({ type: "join-room", room: res.roomId, newPlayers: res.playerSocketIds})
+      console.log(`Join room response is ${res}`)
+      const data = JSON.parse(res)
+      const players = [{socketId: data.payload.white.id}, {socketId: data.payload.black.id}]
+
+      console.log("before dispatch")
+      dispatch({ 
+        type: "join-room", 
+        room: data.gameId, 
+        newPlayers: players})
+      console.log("before navigate")
       navigate("/game")
 
     })

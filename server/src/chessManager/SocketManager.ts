@@ -42,7 +42,6 @@ class SocketManager {
 
   broadcast(roomId: string, message: string) {
     const users = this.roomToUsers.get(roomId)
-    console.log(users)
     if (!users) {
       console.error("No users in this room")
       return

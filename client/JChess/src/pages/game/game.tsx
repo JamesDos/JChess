@@ -128,6 +128,7 @@ export const Game = () => {
     if (move === null) {
       return false
     }
+    console.log(`emmitted move is ${JSON.stringify(move)}`)
     socket.emit("move", { move: move, roomId: room })
     return true
   }
@@ -143,6 +144,25 @@ export const Game = () => {
   }
 
   // Effects
+  useEffect(() => {
+    socket.on("message", (message: string) => {
+      const data = JSON.parse(message)
+      console.log(`message received: ${data}`)
+      if (!data.type || !data.payload) {
+        console.error("bad message! type or payload field not included")
+      }
+      const payload = data.payload
+      if (data.type === "move") {
+        console.log("received move")
+        const move = payload.move
+        makeMove(move)
+      }
+    })
+  }, [makeMove])
+
+
+
+
   useEffect(() => {
     socket.on("move", (move) => {
       console.log(`move is ${move}`)
