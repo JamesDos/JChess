@@ -85,7 +85,6 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
 
   useEffect(() => {
     socket.on("message", (message: string) => {
-      console.log(`Message is ${message}`)
       const data = JSON.parse(message)
       if (!data.type || !data.payload) {
         console.error("bad message! type field not includeded")

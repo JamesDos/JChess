@@ -1,4 +1,4 @@
-import Game from "../models/game";
+import {gameModel as Game} from "../models/game";
 import { Request, Response } from "express";
 import { successMessage, errorMessage } from "./usersController";
 

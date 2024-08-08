@@ -3,9 +3,10 @@ import { Chess, Move } from "chess.js";
 import { v4 as uuidv4 } from 'uuid';
 import { socketManager } from "./SocketManager";
 import { User } from "./SocketManager";
-import { JOIN_GAME, MOVE } from "./messages";
+import { GAME_OVER, JOIN_GAME, MOVE } from "./messages";
+import { gameModel as DBGAME } from "../models/game";
 
-export type GameStatus = "ONGOING" | "PENDING" | "OVER"
+export type GameStatus = "ONGOING" | "PENDING" | "COMPLETED" | "ABANDONED" | "ABORT"
 export type GameResult = "WHITE_WIN" | "BLACK_WIN" | "DRAW"
 
 export class Game {
@@ -15,7 +16,7 @@ export class Game {
   public player2UserId: string | null // player 2 is black
   private chess: Chess
   private startTime: Date
-  private status: GameStatus
+  public status: GameStatus
   private result: GameResult | null
   private moveCount: number
 
@@ -33,6 +34,7 @@ export class Game {
   addPlayer2(player2UserId: string) {
     this.player2UserId = player2UserId
     this.status = "ONGOING"
+    this.setPgnHeaders()
 
     socketManager.broadcast(
       this.gameId,
@@ -51,6 +53,34 @@ export class Game {
     )
   }
 
+  async createGameInDb() {
+    this.startTime = new Date(Date.now())
+    const newGame = new DBGAME({
+      gameId: this.gameId,
+      date: this.startTime,
+      pgn: this.chess.pgn(),
+      black: "",
+      white: "",
+    })
+    try {
+      await newGame.save()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  setPgnHeaders() {
+    if (!this.player2UserId) {
+      console.log("player2 not in game! cannot set pgn headers")
+      return
+    }
+    this.chess.header(
+      "White", this.player1UserId,
+      "Black", this.player2UserId,
+      "Site", "JChess",
+    )
+  }
+
   makeMove(user: User, move: Move) {
     // move validation (ensures white can't move black's pieces and vice versa)
     if (this.chess.turn() == "w" && user.id !== this.player1UserId) {
@@ -60,7 +90,7 @@ export class Game {
       return
     }
 
-    if (this.status === "OVER") {
+    if (this.status === "COMPLETED") {
       console.log("user making move after game ended")
       return
     }
@@ -72,6 +102,8 @@ export class Game {
       console.error(err)
     }
 
+    this.moveCount += 1
+
     socketManager.broadcast(
       this.gameId,
       JSON.stringify({
@@ -79,32 +111,59 @@ export class Game {
         payload: {
           move: move,
           history: this.chess.history({verbose: true}),
-          fen: this.chess.fen()
-
+          fen: this.chess.fen(),
+          moveCount: this.moveCount
         }
       })
     )
 
     if (this.chess.isGameOver()) {
-      if (this.chess.isDraw()) {
-        this.result = "DRAW"
-      } else if (this.chess.isCheckmate()) {
-        const result = this.chess.turn() === "b" ? "WHITE_WIN" : "BLACK_WIN"
-        this.result = result
-        this.endGame()
-      } else {
-        console.log("error: some other result")
-      }
+      this.endGame()
     }
-
-    this.moveCount += 1
   }
 
   endGame() {
+    this.status = "COMPLETED"
+    if (this.chess.isDraw()) {
+      this.result = "DRAW"
+    } else if (this.chess.isCheckmate()) {
+      const result = this.chess.turn() === "b" ? "WHITE_WIN" : "BLACK_WIN"
+      this.result = result
+    } else if (this.chess.getComment() === "white resign") {
+      this.result = "BLACK_WIN"
+    } else if (this.chess.getComment() === "black resign") {
+      this.result = "WHITE_WIN"
+    } else {
+      console.error("error: some other result??")
+      return
+    }
+
     socketManager.broadcast(
       this.gameId,
-      "game ended"
+      JSON.stringify({
+        type: GAME_OVER,
+        payload: {
+          result: this.result,
+          status: this.status,
+          pgn: this.chess.pgn()
+        }
+      })
     )
+  }
+
+  resign(user: User) {
+    if (user.id === this.player1UserId) {
+      this.chess.setComment("white resign")
+    } else if (user.id === this.player2UserId) {
+      this.chess.setComment("black resign")
+    } else {
+      console.error("User not in game!")
+    }
+    this.endGame()
+  }
+
+  drawRequest(user: User) {
+
   }
 
 }

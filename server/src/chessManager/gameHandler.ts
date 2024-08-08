@@ -42,7 +42,6 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
 
   socket.on("move", async (data) => {
     console.log("Handler 'move' triggered");
-    console.log(`roomId is ${data.roomId}`)
     const gameId = data.roomId
     const game = gameManager.findGame(gameId)
     if (!game) {
@@ -52,6 +51,19 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
     game.makeMove(user, data.move)
     return
   })
+
+  socket.on("resign", async (data) => {
+    console.log("Handler 'resign' triggered");
+    const gameId = data.roomId
+    const game = gameManager.findGame(gameId)
+    if (!game) {
+      console.error("No game with gameId");
+      return;
+    }
+
+  })
+
+
 };
 
 export default registerGameHandlers;

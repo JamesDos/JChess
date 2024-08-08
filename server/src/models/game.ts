@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const gameSchema = new mongoose.Schema({
+  gameId: {
+    type: String, 
+    required: true 
+  },
   date: {
     type: Date,
     required: true,
@@ -33,6 +37,5 @@ const gameSchema = new mongoose.Schema({
   }
 })
 
-const gameModel = mongoose.model("Game", gameSchema)
+export const gameModel = mongoose.model("Game", gameSchema)
 
-export default gameModel

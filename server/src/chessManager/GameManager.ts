@@ -51,6 +51,10 @@ class GameManager {
     socketManager.removeUser(user)
   }
 
+  getAllPendingGames() {
+    return this.games.find(g => g.status === "PENDING")
+  }
+
   // addHandlers(user: User, io: Server) {
   //   user.socket.on("create-game", async (data) => {
   //     console.log("in create game")

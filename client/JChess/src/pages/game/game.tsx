@@ -6,6 +6,7 @@ import { Chess, Square, Move, Color} from 'chess.js';
 import socket from "../../connections/socket";
 import useGameSetUp from "../../hooks/useGameSetUp";
 import { useNavigate } from "react-router-dom";
+// import useLocalStorage from "../../hooks/useLocalStorage";
 import './game.css';
 
 import moveSound from "../../assets/audio/move-self.mp3";
@@ -128,7 +129,6 @@ export const Game = () => {
     if (move === null) {
       return false
     }
-    console.log(`emmitted move is ${JSON.stringify(move)}`)
     socket.emit("move", { move: move, roomId: room })
     return true
   }
@@ -152,11 +152,17 @@ export const Game = () => {
         console.error("bad message! type or payload field not included")
       }
       const payload = data.payload
+
       if (data.type === "move") {
-        console.log("received move")
         const move = payload.move
         makeMove(move)
       }
+
+      if (data.type === "game-over") {
+        console.log(`final pgn is ${payload.pgn}`)
+      }
+
+
     })
   }, [makeMove])
 
