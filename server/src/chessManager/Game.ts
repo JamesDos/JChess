@@ -2,9 +2,10 @@ import { Socket } from "socket.io";
 import { Chess, Move } from "chess.js";
 import { v4 as uuidv4 } from 'uuid';
 import { socketManager } from "./SocketManager";
-import { User } from "./SocketManager";
+import { GameUser } from "./SocketManager";
 import { GAME_OVER, JOIN_GAME, MOVE } from "./messages";
 import { gameModel as DBGAME } from "../models/game";
+import User from "../models/user";
 
 export type GameStatus = "ONGOING" | "PENDING" | "COMPLETED" | "ABANDONED" | "ABORT"
 export type GameResult = "WHITE_WIN" | "BLACK_WIN" | "DRAW"
@@ -31,10 +32,24 @@ export class Game {
     this.moveCount = 0
   }
 
-  addPlayer2(player2UserId: string) {
+  async addPlayer2(player2UserId: string) {
     this.player2UserId = player2UserId
     this.status = "ONGOING"
     this.setPgnHeaders()
+
+    let whitePlayer
+    let blackPlayer
+    try {
+      whitePlayer = await User.findById(this.player1UserId)
+      blackPlayer = await User.findById(this.player2UserId)
+    } catch (err) {
+      console.error(err)
+    }
+
+    if (!whitePlayer || !blackPlayer) {
+      console.log("whitePlayer or blackPlayer ids not found in db when joining game!")
+      return
+    }
 
     socketManager.broadcast(
       this.gameId,
@@ -43,9 +58,11 @@ export class Game {
         payload: {
           gameId: this.gameId,
           white: {
+            username: whitePlayer.username,
             id: this.player1UserId
           },
           black: {
+            username: blackPlayer.username,
             id: this.player2UserId
           }
         }
@@ -59,8 +76,8 @@ export class Game {
       gameId: this.gameId,
       date: this.startTime,
       pgn: this.chess.pgn(),
-      black: "",
-      white: "",
+      white: this.player1UserId,
+      black: this.player2UserId
     })
     try {
       await newGame.save()
@@ -81,7 +98,7 @@ export class Game {
     )
   }
 
-  makeMove(user: User, move: Move) {
+  makeMove(user: GameUser, move: Move) {
     // move validation (ensures white can't move black's pieces and vice versa)
     if (this.chess.turn() == "w" && user.id !== this.player1UserId) {
       return 
@@ -151,7 +168,7 @@ export class Game {
     )
   }
 
-  resign(user: User) {
+  resign(user: GameUser) {
     if (user.id === this.player1UserId) {
       this.chess.setComment("white resign")
     } else if (user.id === this.player2UserId) {
@@ -162,7 +179,7 @@ export class Game {
     this.endGame()
   }
 
-  drawRequest(user: User) {
+  drawRequest(user: GameUser) {
 
   }
 

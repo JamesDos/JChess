@@ -3,11 +3,12 @@ import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 // import socket from "../connections/socket";
 import { useSocket } from "../hooks/useSocket"
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 export const GameSetUpContext = createContext<gameContextType | null>(null)
 
 interface Player {
-  socketId: string
+  username: string
 }
 
 export interface gameContextType {
@@ -20,7 +21,7 @@ export interface gameContextType {
 interface gameSetupType {
   room: string,
   orientation: BoardOrientation | string,
-  players: {socketId: string}[],
+  players: {username: string}[],
 }
 
 type Action = 
@@ -75,6 +76,7 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   const socket = useSocket()
   const [gameSetUpData, dispatch] = useReducer(reducer, {room: "", orientation:"", players:[]})
   const navigate = useNavigate()
+  const { username } = useAuth() 
 
   // useEffect(() => {
   //   socket?.on("opponent-joined", (roomData) => {
@@ -105,23 +107,23 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
       }
 
       if (data.type === "join-game") {
-        const players = [{socketId: payload.white.id}, {socketId: payload.black.id}]
-        if (payload.white.id === socket.id) {
+        const players = [{username: payload.white.username}, {username: payload.black.username}]
+        if (payload.white.username === username) {
           // dispatch({type: "set-orientation", orientation: "white"})
           dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
-        } else if (payload.black.id === socket.id) {
+        } else if (payload.black.username === username) {
           // dispatch({type: "set-orientation", orientation: "black"})
           dispatch({type:"join-room", room: payload.gameId, orientation: "black", newPlayers: players})
         } else {
-          console.error("socket id not in join-game payload!")
+          console.error("username not in join-game payload!")
           return
         }
-  
+        console.log(`players in game are ${players[0].username} ${players[1].username}`)
         navigate("/game")
       }
     })
 
-  }, [navigate, socket])
+  }, [navigate, socket, username])
 
   return (
     <GameSetUpContext.Provider value={{...gameSetUpData, dispatch}}>

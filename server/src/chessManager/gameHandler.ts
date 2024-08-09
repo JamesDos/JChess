@@ -1,13 +1,36 @@
 import { Server, Socket } from 'socket.io';
 import  { gameManager } from './gameManager';
 import { Game } from "./Game"
-import { User } from './SocketManager';
+import { GameUser } from './SocketManager';
 import { socketManager } from './SocketManager';
 import * as messages from "./messages";
+import jwt from 'jsonwebtoken';
+import "dotenv/config";
+
+interface userJWTClaims {
+  username: string
+  id: string
+}
 
 
 const registerGameHandlers = (io: Server, socket: Socket) => {
-  const user = new User(socket, socket.id);
+  let decoded
+  try {
+    // ideally should be jwt.verify 
+    // TODO: refresh token on frontend before socket connection
+    decoded = jwt.decode(socket.handshake.auth.token) as userJWTClaims
+    console.log(`Decoded username ${decoded.username}`)
+    console.log(`Decoded id ${decoded.id}`)
+  } catch (err) {
+    console.error(err)
+  }
+
+  if (!decoded) {
+    console.error("jwt payload undefined!")
+    return
+  }
+
+  const user = new GameUser(socket, decoded.id, decoded.username);
   gameManager.addUser(user);
 
   socket.on("create-game", (cb) => {

@@ -50,9 +50,5 @@ import { SocketContext } from "../contexts/SocketProvider";
 
 
 export const useSocket = () => {
-  const context = useContext(SocketContext)
-  // if (context === null) {
-  //   throw new Error("useSocket must be used within a SocketProvider!")
-  // }
-  return context
+  return useContext(SocketContext)
 }

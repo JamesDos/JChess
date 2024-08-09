@@ -1,12 +1,14 @@
 import { Server, Socket } from "socket.io";
 
-export class User {
+export class GameUser {
   public socket: Socket
   public id: string
+  public username: string
 
-  constructor(socket: Socket, id: string) {
+  constructor(socket: Socket, id: string, username: string) {
     this.socket = socket
     this.id = id
+    this.username = username
   }
 }
 
@@ -16,11 +18,11 @@ class SocketManager {
    * userToRoom maps each userId to the room that the user is in
    */
   private static instance: SocketManager
-  private roomToUsers: Map<string, User[]>
+  private roomToUsers: Map<string, GameUser[]>
   private userToRoom: Map<string, string>
 
   constructor() {
-    this.roomToUsers = new Map<string, User[]>()
+    this.roomToUsers = new Map<string, GameUser[]>()
     this.userToRoom = new Map<string, string>()
   }
 
@@ -32,7 +34,7 @@ class SocketManager {
     return SocketManager.instance
   }
 
-  addUser(user: User, roomId: string) {
+  addUser(user: GameUser, roomId: string) {
     this.roomToUsers.set(roomId, [
       ...(this.roomToUsers.get(roomId) || []),
       user
@@ -51,7 +53,7 @@ class SocketManager {
     })
   }
 
-  removeUser(user: User) {
+  removeUser(user: GameUser) {
     const roomId = this.userToRoom.get(user.id)
     if (!roomId) {
       console.error("user not in any rooms")

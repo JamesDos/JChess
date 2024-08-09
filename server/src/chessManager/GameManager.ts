@@ -1,12 +1,12 @@
 import { Server, Socket } from "socket.io";
 import { Game } from "./Game";
-import { User, socketManager } from "./SocketManager";
+import { GameUser, socketManager } from "./SocketManager";
 import * as messages from "./messages";
 
 class GameManager {
   private static instance: GameManager
   private games: Game[]
-  private users: User[]
+  private users: GameUser[]
 
   constructor() {
     this.games = []
@@ -33,11 +33,11 @@ class GameManager {
     return this.games.find(g => g.gameId === gameId)
   }
 
-  addUser(user: User) {
+  addUser(user: GameUser) {
     this.users.push(user)
   }
 
-  addUserToGame(user: User, gameId: string) {
+  addUserToGame(user: GameUser, gameId: string) {
     socketManager.addUser(user, gameId)
   }
 

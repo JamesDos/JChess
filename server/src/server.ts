@@ -5,8 +5,6 @@ import { Server, Socket } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
-import { gameManager } from "./chessManager/gameManager";
-import { User } from "./chessManager/SocketManager";
 import registerGameHandlers from "./chessManager/gameHandler";
 
 // Databases

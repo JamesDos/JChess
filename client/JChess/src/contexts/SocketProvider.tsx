@@ -1,6 +1,8 @@
 import React, { useState, useEffect, createContext } from "react";
 import {io, Socket} from 'socket.io-client';
 import useAuth from "../hooks/useAuth";
+import { jwtDecode } from "jwt-decode";
+import useRefreshToken from "../hooks/useRefreshToken";
 
 export const SocketContext = createContext<Socket| null>(null)
 
@@ -9,6 +11,7 @@ const SOCKET_URL = "http://localhost:3000"
 export const SocketProvider = ({children}: {children: React.ReactNode}) => {
   const [socket, setSocket] = useState<Socket | null>(null)
   const { accessToken } = useAuth()
+  // const refresh = useRefreshToken()
 
   useEffect(() => {
 
@@ -17,6 +20,17 @@ export const SocketProvider = ({children}: {children: React.ReactNode}) => {
       console.log("no auth token for socket connection!")
       return 
     }
+
+    // if (accessToken) {
+    //   const decoded = jwtDecode(accessToken)
+    //   if (decoded.exp) {
+    //     const isExpired = decoded?.exp < new Date().getTime() / 1000
+    //     if (isExpired) {
+    //       console.log("expired token, refreshing")
+    //       refresh()
+    //     }
+    //   }
+    // }
     
     const socket = io(SOCKET_URL, {
       auth: {
