@@ -7,6 +7,7 @@ import { Home } from "./pages/Home/home";
 import { PrivateRoutes } from "./utils/PrivateRoutes";
 import { AuthProvider } from "./contexts/AuthProvider";
 import { GameSetUpProvider } from "./contexts/GameSetUpProvider";
+import { GameContextLayout } from "./utils/gameContextLayout";
 import PersistLogin from "./utils/persistLogin";
 
 const App = () => {
@@ -20,7 +21,7 @@ const App = () => {
             <Route element={<PersistLogin/>}>
               <Route element={<PrivateRoutes/>}>
                 <Route path="/" element={<Home/>}/>
-                <Route element={<GameSetUpProvider><Outlet/></GameSetUpProvider>}>
+                <Route element={<GameContextLayout/>}>
                   <Route path="/lobby" element={<Lobby/>}/>
                   <Route path="/game" element={<Game/>}/>
                 </Route>

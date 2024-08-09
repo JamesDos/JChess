@@ -3,10 +3,11 @@ import { useSound } from "use-sound";
 import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
 import { Chess, Square, Move, Color} from 'chess.js';
-import socket from "../../connections/socket";
+// import socket from "../../connections/socket";
 import useGameSetUp from "../../hooks/useGameSetUp";
 import { useNavigate } from "react-router-dom";
 // import useLocalStorage from "../../hooks/useLocalStorage";
+import { useSocket } from "../../hooks/useSocket";
 import './game.css';
 
 import moveSound from "../../assets/audio/move-self.mp3";
@@ -33,6 +34,8 @@ interface moveData {
 export const Game = () => {
 
   const { room, orientation, players, dispatch } = useGameSetUp()
+
+  const socket = useSocket()
 
   const chess = useMemo(() => new Chess(), []);
   const [displayPosition, setDisplayPosition] = useState('start')
@@ -129,7 +132,7 @@ export const Game = () => {
     if (move === null) {
       return false
     }
-    socket.emit("move", { move: move, roomId: room })
+    socket?.emit("move", { move: move, roomId: room })
     return true
   }
 
@@ -140,12 +143,12 @@ export const Game = () => {
     const message = `${loser} resigns! ${winner} wins!`
     setOver(message)
     chess.setComment(`${loser} resigns`)
-    socket.emit("resign", {roomId: room, message: message})
+    socket?.emit("resign", {roomId: room, message: message})
   }
 
   // Effects
   useEffect(() => {
-    socket.on("message", (message: string) => {
+    socket?.on("message", (message: string) => {
       const data = JSON.parse(message)
       console.log(`message received: ${data}`)
       if (!data.type || !data.payload) {
@@ -164,39 +167,39 @@ export const Game = () => {
 
 
     })
-  }, [makeMove])
+  }, [makeMove, socket])
 
 
 
 
-  useEffect(() => {
-    socket.on("move", (move) => {
-      console.log(`move is ${move}`)
-      makeMove(move)
-    })
-  }, [makeMove])
+  // useEffect(() => {
+  //   socket.on("move", (move) => {
+  //     console.log(`move is ${move}`)
+  //     makeMove(move)
+  //   })
+  // }, [makeMove])
 
-  useEffect(() => {
-    socket.on("opponent-resign", (message) => {
-      setOver(message)
-      setDraggable(false)
-    })
-  }, [])
+  // useEffect(() => {
+  //   socket.on("opponent-resign", (message) => {
+  //     setOver(message)
+  //     setDraggable(false)
+  //   })
+  // }, [])
 
-  useEffect(() => {
-    socket.on("player-disconnected", (player) => {
-      console.log(`Opponent with id ${player} has disconnected`)
-      setOver(`Opponent with id ${player} has disconnected`)
-    })
-  }, [])
+  // useEffect(() => {
+  //   socket.on("player-disconnected", (player) => {
+  //     console.log(`Opponent with id ${player} has disconnected`)
+  //     setOver(`Opponent with id ${player} has disconnected`)
+  //   })
+  // }, [])
 
-  useEffect(() => {
-    socket.on("close-room", ({roomId}) => {
-      if (roomId === room) {
-        dispatch({type: "cleanup-room"})
-      }
-    })
-  }, [dispatch, room])
+  // useEffect(() => {
+  //   socket.on("close-room", ({roomId}) => {
+  //     if (roomId === room) {
+  //       dispatch({type: "cleanup-room"})
+  //     }
+  //   })
+  // }, [dispatch, room])
 
   // Helper functions for event handlers
   const handleSetBoardToPos = (pos: string) => {
@@ -266,7 +269,7 @@ export const Game = () => {
 
   const handleBackToLobby = (e: React.MouseEvent) => {
     e.preventDefault()
-    socket.emit("close-room", {roomId: room})
+    socket?.emit("close-room", {roomId: room})
     navigate("/lobby")
   }
 

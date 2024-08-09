@@ -27,6 +27,7 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
 
   socket.on("join-room", async (data) => {
     console.log("Handler 'join-room' triggered");
+    console.log(`socket auth is ${socket.handshake.auth.token}`)
     const gameId = data.roomId;
     const game = gameManager.findGame(gameId);
     if (!game) {
@@ -37,6 +38,8 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       socketManager.addUser(user, gameId)
       game.addPlayer2(user.id);
       return;
+    } else {
+      console.log(`game not made! player2 is ${game.player2UserId}`)
     }
   });
 

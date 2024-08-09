@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect, createContext} from "react";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
-import socket from "../connections/socket";
+// import socket from "../connections/socket";
+import { useSocket } from "../hooks/useSocket"
 import { useNavigate } from "react-router-dom";
 
 export const GameSetUpContext = createContext<gameContextType | null>(null)
@@ -71,20 +72,28 @@ const reducer = (state: gameSetupType, action: Action) => {
 }
 
 export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
+  const socket = useSocket()
   const [gameSetUpData, dispatch] = useReducer(reducer, {room: "", orientation:"", players:[]})
   const navigate = useNavigate()
 
-  useEffect(() => {
-    socket.on("opponent-joined", (roomData) => {
-      console.log("effect called")
-      console.log("roomData", roomData)
-      dispatch({type: "update-players", newPlayers: roomData.playerSocketIds})
-      navigate("/game")
-    });
-  }, [navigate])
+  // useEffect(() => {
+  //   socket?.on("opponent-joined", (roomData) => {
+  //     console.log("effect called")
+  //     console.log("roomData", roomData)
+  //     dispatch({type: "update-players", newPlayers: roomData.playerSocketIds})
+  //     navigate("/game")
+  //   });
+  // }, [navigate, socket])
 
   useEffect(() => {
+    console.log(`socket is ${socket?.id}`)
+    if (!socket) {
+      console.log(`no socket in useSocket.`)
+      return
+    }
+
     socket.on("message", (message: string) => {
+      console.log("in message!")
       const data = JSON.parse(message)
       if (!data.type || !data.payload) {
         console.error("bad message! type field not includeded")
@@ -110,15 +119,9 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   
         navigate("/game")
       }
-
-
-
-
-
-
     })
 
-  }, [navigate])
+  }, [navigate, socket])
 
   return (
     <GameSetUpContext.Provider value={{...gameSetUpData, dispatch}}>

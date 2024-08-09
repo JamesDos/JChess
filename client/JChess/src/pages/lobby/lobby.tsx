@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import socket from "../../connections/socket";
+// import socket from "../../connections/socket";
+import { useSocket } from "../../hooks/useSocket";
 import useGameSetUp from "../../hooks/useGameSetUp";
 
 export interface LobbyProps {
@@ -11,6 +12,8 @@ export interface LobbyProps {
 
 export const Lobby = () => {
 
+  const socket = useSocket()
+
   const { dispatch } = useGameSetUp()
 
   const [makeRoomId, setMakeRoomId] =  useState("")
@@ -20,31 +23,32 @@ export const Lobby = () => {
 
   const createRoom = useCallback( (e: React.MouseEvent) => {
     e.preventDefault()
-    socket.emit("create-game", (room: string) => {
+    socket?.emit("create-game", (room: string) => {
       console.log(`Created room with id ${room}`)
       dispatch({ type: "create-room", room: room })
       setMakeRoomId(room)
     })
-  }, [dispatch]) 
+  }, [dispatch, socket]) 
 
   const joinGame = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
-    socket.emit("join-room", {roomId: joinRoomId}, (res: string) => {
+    console.log(`socket is ${socket?.id}`)
+    socket?.emit("join-room", {roomId: joinRoomId}, (res: string) => {
       // TODO: make send res in callback for gameHandler
       console.log(`Join room response is ${res}`)
       const data = JSON.parse(res)
       const players = [{socketId: data.payload.white.id}, {socketId: data.payload.black.id}]
 
       console.log("before dispatch")
-      dispatch({ 
-        type: "join-room", 
-        room: data.gameId, 
-        newPlayers: players})
+      // dispatch({ 
+      //   type: "join-room", 
+      //   room: data.gameId, 
+      //   newPlayers: players})
       console.log("before navigate")
       navigate("/game")
 
     })
-  }, [dispatch, joinRoomId, navigate])
+  }, [dispatch, joinRoomId, navigate, socket])
 
   return (
     <div className="lobby-container">
