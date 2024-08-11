@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { socketManager } from "./SocketManager";
 import { GameUser } from "./SocketManager";
 import { GAME_OVER, JOIN_GAME, MOVE } from "./messages";
-import { gameModel as DBGAME } from "../models/game";
+import { gameModel as DBGame } from "../models/game";
+import { moveModel as DBMove } from "../models/move";
 import User from "../models/user";
 
 export type GameStatus = "ONGOING" | "PENDING" | "COMPLETED" | "ABANDONED" | "ABORT"
@@ -19,7 +20,7 @@ export class Game {
   private startTime: Date
   public status: GameStatus
   private result: GameResult | null
-  private moveCount: number
+  private moveNumber: number
 
   constructor(player1: string, player2: string | null) {
     this.player1UserId = player1
@@ -29,7 +30,7 @@ export class Game {
     this.gameId = uuidv4()
     this.status = "PENDING"
     this.result = null
-    this.moveCount = 0
+    this.moveNumber = 0
   }
 
   async addPlayer2(player2UserId: string) {
@@ -48,6 +49,13 @@ export class Game {
 
     if (!whitePlayer || !blackPlayer) {
       console.log("whitePlayer or blackPlayer ids not found in db when joining game!")
+      return
+    }
+
+    try {
+      await this.createGameInDb()
+    } catch (err) {
+      console.error(err)
       return
     }
 
@@ -71,19 +79,17 @@ export class Game {
   }
 
   async createGameInDb() {
+    // Only call when player2 joins game
     this.startTime = new Date(Date.now())
-    const newGame = new DBGAME({
+    const newGame = new DBGame({
       gameId: this.gameId,
       date: this.startTime,
       pgn: this.chess.pgn(),
+      currentPosition: this.chess.fen(),
       white: this.player1UserId,
       black: this.player2UserId
     })
-    try {
-      await newGame.save()
-    } catch (err) {
-      console.error(err)
-    }
+    await newGame.save()
   }
 
   setPgnHeaders() {
@@ -98,7 +104,24 @@ export class Game {
     )
   }
 
-  makeMove(user: GameUser, move: Move) {
+  async addMoveToDb(move: Move) {
+    const addedMove = new DBMove({
+      gameId: this.gameId,
+      moveNumber: this.moveNumber, 
+      before: move.before,
+      after: move.after,
+      color: move.color,
+      piece: move.piece,
+      from: move.from,
+      to: move.to,
+      san: move.san,
+      flags: move.flags
+    })
+    await addedMove.save()
+    await DBGame.findOneAndUpdate({gameId: this.gameId}, {currentPosition: move.after})
+  }
+
+  async makeMove(user: GameUser, move: Move) {
     // move validation (ensures white can't move black's pieces and vice versa)
     if (this.chess.turn() == "w" && user.id !== this.player1UserId) {
       return 
@@ -119,7 +142,14 @@ export class Game {
       console.error(err)
     }
 
-    this.moveCount += 1
+    this.moveNumber += 1
+
+    try {
+      await this.addMoveToDb(move)
+    } catch (err) {
+      console.error(err)
+      return
+    }
 
     socketManager.broadcast(
       this.gameId,
@@ -127,9 +157,9 @@ export class Game {
         type: MOVE, 
         payload: {
           move: move,
-          history: this.chess.history({verbose: true}),
+          history: this.chess.history(),
           fen: this.chess.fen(),
-          moveCount: this.moveCount
+          moveNumber: this.moveNumber
         }
       })
     )

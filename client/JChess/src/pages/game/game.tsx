@@ -294,6 +294,9 @@ export const Game = () => {
         setSelectedMoveNum={setMoveCount}
         resetSquares={resetHighlightedSquares}
         />
+      <div>
+        {players.map(player => player.username)}
+      </div>
       {over === "" 
         ?  
         <button onClick={handleResign}>Resign</button>

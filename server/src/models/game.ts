@@ -15,6 +15,10 @@ const gameSchema = new mongoose.Schema({
     required: true,
     // immutable: true,
   },
+  currentPosition: {
+    type: String,
+    required: true
+  },
   black: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: "User",

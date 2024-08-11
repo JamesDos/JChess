@@ -121,6 +121,8 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
         console.log(`players in game are ${players[0].username} ${players[1].username}`)
         navigate("/game")
       }
+
+      
     })
 
   }, [navigate, socket, username])
