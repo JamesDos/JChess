@@ -1,6 +1,8 @@
-import {gameModel as Game} from "../models/game";
+import { gameModel as Game } from "../models/game";
+import { Game as GameManagerGame } from "../chessManager/Game"
 import { Request, Response } from "express";
 import { successMessage, errorMessage } from "./usersController";
+import { gameManager } from "../chessManager/gameManager";
 
 // Root (/) functions
 export const getAllGames = async (req: Request, res: Response) => {
@@ -30,6 +32,7 @@ export const createGame = async (req: Request, res: Response) => {
     res.status(400).json(errorMessage(err))
   }
 }
+
 
 
 // /:id functions
@@ -103,4 +106,17 @@ export const getUserBlackGames = async (req: Request, res: Response) => {
   } catch (err) {
     res.status(500).json(errorMessage(err))
   }
+}
+
+// /pending
+export const getAllPendingGames = (req: Request, res: Response) => {
+  const games = gameManager.getAllPendingGames()
+  const gameData = games.map(game => (
+    {
+      gameId: game.gameId,
+      whiteUsername: game.player1Username,
+      whilteId: game.player1UserId
+    }
+  ))
+  res.json(gameData)
 }

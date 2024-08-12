@@ -5,6 +5,7 @@ const useRefreshToken = () => {
   const { setAuth } = useAuth()
 
   const refresh = async () => {
+    console.log("in useRefreshToken")
     const response = await axiosInstance.get(
       "/refresh", 
       {withCredentials: true}
@@ -14,7 +15,6 @@ const useRefreshToken = () => {
       password: prev?.password || "", 
       accessToken: response.data.accessToken,
     }))
-    console.log(`Response is ${response.data.accessToken}`)
     return response.data.accessToken
   }
 

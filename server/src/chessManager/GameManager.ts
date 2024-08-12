@@ -52,7 +52,7 @@ class GameManager {
   }
 
   getAllPendingGames() {
-    return this.games.find(g => g.status === "PENDING")
+    return this.games.filter(g => g.status === "PENDING")
   }
 
 }

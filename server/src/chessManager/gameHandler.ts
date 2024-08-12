@@ -18,16 +18,22 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
   try {
     // ideally should be jwt.verify 
     // TODO: refresh token on frontend before socket connection
+    // decoded = jwt.verify(socket.handshake.auth.token, process.env.ACCESS_TOKEN_SECRET as string) as userJWTClaims
     decoded = jwt.decode(socket.handshake.auth.token) as userJWTClaims
     console.log(`Decoded username ${decoded.username}`)
     console.log(`Decoded id ${decoded.id}`)
   } catch (err) {
     console.error(err)
+    return
   }
 
   if (!decoded) {
-    console.error("jwt payload undefined!")
+    console.error("decoded is undefined!!!")
     return
+  }
+
+  if (!decoded.id) {
+    console.error(`decoded id is not defined. decoded username is ${decoded.username}`)
   }
 
   const user = new GameUser(socket, decoded.id, decoded.username);
@@ -35,7 +41,7 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
 
   socket.on("create-game", (cb) => {
     console.log("Handler 'create-game' triggered");
-    const game = new Game(user.id, null);
+    const game = new Game(user.id, user.username);
     const gameId = game.gameId;
     gameManager.addGame(game);
     socketManager.addUser(user, gameId)
@@ -46,23 +52,27 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       }
     }));
     cb(gameId)
+    io.emit("game-change") // alert all sockets of new game creation to update lobby
   });
 
   socket.on("join-room", async (data) => {
     console.log("Handler 'join-room' triggered");
-    console.log(`socket auth is ${socket.handshake.auth.token}`)
     const gameId = data.roomId;
     const game = gameManager.findGame(gameId);
     if (!game) {
       console.error("No game with gameId");
       return;
     }
-    if (game && game.player2UserId === null) {
+    if (game.player1UserId == user.id) {
+      console.log("cannot join game with yourself!")
+      return;
+    }
+    if (game.player2UserId === null) {
       socketManager.addUser(user, gameId)
       game.addPlayer2(user.id);
-      return;
+      io.emit("game-change") 
     } else {
-      console.log(`game not made! player2 is ${game.player2UserId}`)
+      console.log("cannot join game that is full!")
     }
   });
 
@@ -86,7 +96,7 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       console.error("No game with gameId");
       return;
     }
-
+    game.resign(user)
   })
 
 

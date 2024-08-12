@@ -3,7 +3,7 @@ import { Chess, Move } from "chess.js";
 import { v4 as uuidv4 } from 'uuid';
 import { socketManager } from "./SocketManager";
 import { GameUser } from "./SocketManager";
-import { GAME_OVER, JOIN_GAME, MOVE } from "./messages";
+import { GAME_OVER, JOIN_GAME, MOVE, GAME_RESIGN } from "./messages";
 import { gameModel as DBGame } from "../models/game";
 import { moveModel as DBMove } from "../models/move";
 import User from "../models/user";
@@ -16,15 +16,19 @@ export class Game {
   public gameId: string
   public player1UserId: string // player 1 is white
   public player2UserId: string | null // player 2 is black
+  public player1Username: string
+  public player2Username: string
   private chess: Chess
   private startTime: Date
   public status: GameStatus
   private result: GameResult | null
   private moveNumber: number
 
-  constructor(player1: string, player2: string | null) {
-    this.player1UserId = player1
+  constructor(player1UserId: string, player1Username: string) {
+    this.player1UserId = player1UserId
+    this.player1Username = player1Username
     this.player2UserId = null
+    this.player2Username = ""
     this.chess = new Chess()
     this.startTime = new Date()
     this.gameId = uuidv4()
@@ -199,13 +203,28 @@ export class Game {
   }
 
   resign(user: GameUser) {
+    let resigner
+    let winner
     if (user.id === this.player1UserId) {
       this.chess.setComment("white resign")
+      resigner = { username: this.player1Username, id: this.player1UserId }
+      winner = {username: this.player2Username, id: this.player2UserId }
     } else if (user.id === this.player2UserId) {
       this.chess.setComment("black resign")
+      resigner = {username: this.player2Username, id: this.player2UserId }
+      winner = { username: this.player1Username, id: this.player1UserId }
     } else {
       console.error("User not in game!")
+      return
     }
+    socketManager.broadcast(this.gameId, JSON.stringify({
+      type: GAME_RESIGN,
+      payload: {
+        gameId: this.gameId,
+        resigner: {...resigner},
+        winner: {...winner}
+      }
+    }));
     this.endGame()
   }
 

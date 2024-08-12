@@ -3,5 +3,6 @@ export type Username = {
 }
 
 export type userToken = {
-  username: string 
+  username: string,
+  id: string
 }
