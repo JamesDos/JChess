@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSocket } from "../../hooks/useSocket";
 import useGameSetUp from "../../hooks/useGameSetUp";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import { GamesDisplayer } from "./gamesDisplayer";
 
 export interface LobbyProps {
   setRoom: React.Dispatch<React.SetStateAction<string>>,
@@ -11,7 +12,7 @@ export interface LobbyProps {
   setPlayers: React.Dispatch<React.SetStateAction<{id: string}[]>>,
 }
 
-interface LobbyGameData {
+export interface LobbyGameData {
   gameId: string,
   whiteUsername: string,
 }
@@ -29,7 +30,7 @@ export const Lobby = () => {
 
   const navigate = useNavigate()
 
-  const createRoom = useCallback( (e: React.MouseEvent) => {
+  const createGame = useCallback( (e: React.MouseEvent) => {
     e.preventDefault()
     socket?.emit("create-game", (room: string) => {
       console.log(`Created room with id ${room}`)
@@ -39,24 +40,14 @@ export const Lobby = () => {
   }, [dispatch, socket]) 
 
   const joinGame = useCallback((e: React.MouseEvent, gameId: string) => {
+    // TODO: Clean this function up
     e.preventDefault()
     console.log(`socket is ${socket?.id}`)
     socket?.emit("join-room", {roomId: gameId}, (res: string) => {
-      // TODO: make send res in callback for gameHandler
       console.log(`Join room response is ${res}`)
-      const data = JSON.parse(res)
-      const players = [{socketId: data.payload.white.id}, {socketId: data.payload.black.id}]
-
-      console.log("before dispatch")
-      // dispatch({ 
-      //   type: "join-room", 
-      //   room: data.gameId, 
-      //   newPlayers: players})
-      console.log("before navigate")
-      navigate("/game")
 
     })
-  }, [dispatch, joinRoomId, navigate, socket])
+  }, [socket])
 
   useEffect(() => {
     let isMounted = true
@@ -86,43 +77,52 @@ export const Lobby = () => {
 
   }, [axiosPrivate, socket])
 
-  const gameList = games.map(game => {
-    return <div 
-    key={game.gameId} 
-    className="gamelist-item"
-    onClick = {e => joinGame(e, game.gameId)}>
-      {game.gameId} {game.whiteUsername}
-      </div>
-  })
+  // const gameList = games.map(game => {
+  //   return <div 
+  //   key={game.gameId} 
+  //   className="gamelist-item"
+  //   onClick = {e => joinGame(e, game.gameId)}>
+  //     {game.gameId} {game.whiteUsername}
+  //     </div>
+  // })
 
+  // return (
+  //   <div className="lobby-container">
+  //     <form>
+  //       <button 
+  //       className="create-game-btn"
+  //       onClick={(e) => createRoom(e)}
+  //       >Make Game</button>
+  //       <div className="room-id-display">{makeRoomId}</div>
+  //       <input 
+  //         type="text" 
+  //         className="join-game-text-input"
+  //         onChange={e => setJoinRoomId(e.target.value)}
+  //         ></input>
+  //       <button
+  //         className="join-game-btn"
+  //         onClick={e => joinGame(e)}
+  //         type="button"
+  //         >Join Game
+  //       </button>
+  //       <Link to="/game">
+  //         <button>
+  //           Go To Game
+  //         </button>
+  //       </Link>
+  //     </form>
+  //     <div className="lobby--gamelist">
+  //       {gameList}
+  //     </div>
+  //   </div>
+  // )
   return (
-    <div className="lobby-container">
-      <form>
-        <button 
-        className="create-game-btn"
-        onClick={(e) => createRoom(e)}
-        >Make Game</button>
-        <div className="room-id-display">{makeRoomId}</div>
-        <input 
-          type="text" 
-          className="join-game-text-input"
-          onChange={e => setJoinRoomId(e.target.value)}
-          ></input>
-        <button
-          className="join-game-btn"
-          onClick={e => joinGame(e)}
-          type="button"
-          >Join Game
-        </button>
-        <Link to="/game">
-          <button>
-            Go To Game
-          </button>
-        </Link>
-      </form>
-      <div className="lobby--gamelist">
-        {gameList}
-      </div>
-    </div>
+    <main className="min-h-screen grid place-items-center">
+      <GamesDisplayer
+        createGame={createGame}
+        joinGame={joinGame}
+        gameList={games}
+      />
+    </main>
   )
 }

@@ -41,6 +41,13 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
 
   socket.on("create-game", (cb) => {
     console.log("Handler 'create-game' triggered");
+    const userGames = gameManager.findGamesWithUser(user)
+    if (userGames.length > 0) { // user already has pending games
+      console.log("cannot make multiple games at once!")
+      console.log(`userGames are ${userGames.map(g => g.gameId)}`)
+      return
+    }
+
     const game = new Game(user.id, user.username);
     const gameId = game.gameId;
     gameManager.addGame(game);
@@ -85,6 +92,9 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       return;
     }
     game.makeMove(user, data.move)
+    if (game.result) { // move may have caused the game to end
+      gameManager.removeGame(game.gameId)
+    }
     return
   })
 
@@ -97,6 +107,7 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       return;
     }
     game.resign(user)
+    gameManager.removeGame(game.gameId)
   })
 
 

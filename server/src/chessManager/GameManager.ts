@@ -51,6 +51,10 @@ class GameManager {
     socketManager.removeUser(user)
   }
 
+  findGamesWithUser(user: GameUser) {
+    return this.games.filter(g => g.status === "PENDING" && g.player1UserId === user.id)
+  }
+
   getAllPendingGames() {
     return this.games.filter(g => g.status === "PENDING")
   }

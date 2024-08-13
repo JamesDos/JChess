@@ -33,6 +33,8 @@ interface moveData {
 
 export const Game = () => {
 
+
+  // TODO: Refactor code to rely on socket data rather than react state data
   const { room, orientation, players, dispatch } = useGameSetUp()
 
   const socket = useSocket()
@@ -69,6 +71,8 @@ export const Game = () => {
       }
     }
   }, [chess])
+
+
 
   const playMoveAudio = useCallback((move: Move) => {
     if (chess.inCheck()) {
@@ -116,10 +120,8 @@ export const Game = () => {
       console.log("Not your turn!")
       return false // prevents players from moving other player's pieces
     }
-    console.log(players)
     if (players.length < 2) { // prevents move if both players not connected
-      console.log(players)
-      console.log("At least one player has not connected")
+      console.log(`At least one player has not connected. Curr players are ${players}`)
       return false
     }
     const moveData = {
@@ -138,12 +140,7 @@ export const Game = () => {
 
   const handleResign = (e: React.MouseEvent) => {
     e.preventDefault()
-    const loser = orientation 
-    const winner = (orientation === "white" ? "black": "white")
-    const message = `${loser} resigns! ${winner} wins!`
-    setOver(message)
-    chess.setComment(`${loser} resigns`)
-    socket?.emit("resign", {roomId: room, message: message})
+    socket?.emit("resign", {roomId: room})
   }
 
   // Effects
@@ -165,9 +162,17 @@ export const Game = () => {
         console.log(`final pgn is ${payload.pgn}`)
       }
 
+      if (data.type === "game-resign") {
+        const resigner = payload.resigner
+        const winner = payload.winner
+        const message = `${resigner.color} resigns! ${winner.color} wins!`
+        setOver(message)
+        chess.setComment(`${resigner.color} resigns`)
+      }
+
 
     })
-  }, [makeMove, socket])
+  }, [makeMove, socket, chess])
 
 
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../../api/axios";
 import axios from "axios";
-import "./register.css";
+// import "./register.css";
 import { Link } from "react-router-dom";
 
 // username must be 4 - 24 chars long, start with lowercase letter
@@ -76,25 +76,26 @@ export const Register = () => {
   }
 
   return (
-    <div className="register-page">
+    <div className="min-h-screen grid place-items-center">
       {success ? (
         <section className="register-success-container">
           <p>Success!</p>
           <p>{/** Add react router for sign in*/}</p>
         </section>
       ) : (
-      <section className="register-container">
+      <section className="flex flex-col justify-center h-3/5 w-1/5 bg-light-grey px-10 py-6 rounded-md">
         <p className={!errMsg? "err-msg" : "hidden"}>{errMsg}</p>
-        <h1>Sign Up</h1>
-        <form className="register-form" onSubmit={handleSubmit}> 
+        <h1 className="flex items-center text-2xl font-bold grow">Sign Up</h1>
+        <form className="flex flex-col gap-5 grow" onSubmit={handleSubmit}> 
 
-          <div>
+          <div className="flex flex-col gap-1">
             <label htmlFor="register-username">Username:</label>
             <input 
               type="text" 
               id="register-username"
               autoComplete="off"
               required
+              className="h-30 border-none indent-1 text-black"
               onChange={e => setUsername(e.target.value)}
             />
             <p className={username && !validUsername ? "instructions" : "hidden"}>
@@ -104,12 +105,13 @@ export const Register = () => {
             </p>
           </div>
 
-          <div>
+          <div className="flex flex-col gap-1">
             <label htmlFor="register-pwd">Password:</label>
             <input 
               type="password" 
               id="register-pwd"
               required
+              className="h-30 border-none indent-1 text-black"
               onChange={e => setPwd(e.target.value)}
             />
             <p className={pwd && !validPwd ? "instructions" : "hidden"}>
@@ -119,12 +121,13 @@ export const Register = () => {
             </p>
           </div>
 
-          <div>
+          <div className="flex flex-col gap-1">
             <label htmlFor="register-confirm-pwd">Confirm Password:</label>
             <input 
               type="password" 
               id="register-confirm-pwd"
               required
+              className="h-30 border-none indent-1 text-black"
               onChange={e => setConfirmPwd(e.target.value)}
             />
             <p className={!validConfirmPwd? "instructions" : "hidden"}>
@@ -132,16 +135,14 @@ export const Register = () => {
             </p>
           </div>
 
-          <div>
-            <button
-              disabled={(!validUsername || !validPwd || !validConfirmPwd) ? true :  false}
-              className="btn-signup"
-            >Sign Up</button>
-          </div>
+          <button
+            disabled={(!validUsername || !validPwd || !validConfirmPwd) ? true :  false}
+            className="h-10 border-none rounded-md bg-white text-black my-2"
+          >Sign Up</button>
 
         </form>
 
-        <p>Already registered?<br />
+        <p className="grow">Already registered?<br />
           <Link to="/login">
             Log In
           </Link>

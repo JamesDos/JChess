@@ -78,15 +78,6 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   const navigate = useNavigate()
   const { username } = useAuth() 
 
-  // useEffect(() => {
-  //   socket?.on("opponent-joined", (roomData) => {
-  //     console.log("effect called")
-  //     console.log("roomData", roomData)
-  //     dispatch({type: "update-players", newPlayers: roomData.playerSocketIds})
-  //     navigate("/game")
-  //   });
-  // }, [navigate, socket])
-
   useEffect(() => {
     console.log(`socket is ${socket?.id}`)
     if (!socket) {
@@ -109,10 +100,8 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
       if (data.type === "join-game") {
         const players = [{username: payload.white.username}, {username: payload.black.username}]
         if (payload.white.username === username) {
-          // dispatch({type: "set-orientation", orientation: "white"})
           dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
         } else if (payload.black.username === username) {
-          // dispatch({type: "set-orientation", orientation: "black"})
           dispatch({type:"join-room", room: payload.gameId, orientation: "black", newPlayers: players})
         } else {
           console.error("username not in join-game payload!")

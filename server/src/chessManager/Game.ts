@@ -21,7 +21,7 @@ export class Game {
   private chess: Chess
   private startTime: Date
   public status: GameStatus
-  private result: GameResult | null
+  public result: GameResult | null
   private moveNumber: number
 
   constructor(player1UserId: string, player1Username: string) {
@@ -169,12 +169,12 @@ export class Game {
     )
 
     if (this.chess.isGameOver()) {
-      this.endGame()
+      this.endGame("COMPLETED")
     }
   }
 
-  endGame() {
-    this.status = "COMPLETED"
+  endGame(status: GameStatus) {
+    this.status = status
     if (this.chess.isDraw()) {
       this.result = "DRAW"
     } else if (this.chess.isCheckmate()) {
@@ -207,12 +207,12 @@ export class Game {
     let winner
     if (user.id === this.player1UserId) {
       this.chess.setComment("white resign")
-      resigner = { username: this.player1Username, id: this.player1UserId }
-      winner = {username: this.player2Username, id: this.player2UserId }
+      resigner = { username: this.player1Username, id: this.player1UserId, color: "white"}
+      winner = {username: this.player2Username, id: this.player2UserId, color: "black"}
     } else if (user.id === this.player2UserId) {
       this.chess.setComment("black resign")
-      resigner = {username: this.player2Username, id: this.player2UserId }
-      winner = { username: this.player1Username, id: this.player1UserId }
+      resigner = {username: this.player2Username, id: this.player2UserId, color: "black"}
+      winner = { username: this.player1Username, id: this.player1UserId, color: "white"}
     } else {
       console.error("User not in game!")
       return
@@ -225,11 +225,11 @@ export class Game {
         winner: {...winner}
       }
     }));
-    this.endGame()
+    this.endGame("COMPLETED")
   }
 
   drawRequest(user: GameUser) {
-
+    // TODO: Implement draw request 
   }
 
 }

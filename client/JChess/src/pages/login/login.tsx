@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
-import "./login.css";
+// import "./login.css";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axios";
 import axios from "axios";
@@ -62,13 +62,13 @@ export const Login = () => {
   }
 
   return (
-    <div className="login-page">
-      <section className="login-container">
-      <p className={!errMsg? "err-msg" : "hidden"}>{errMsg}</p>
-        <h1>Login</h1>
-        <form className="login-form" onSubmit={handleSubmit}>
+    <div className="min-h-screen grid place-items-center">
+      <section className="flex flex-col justify-center h-1/2 w-1/5 bg-light-grey px-10 py-4 rounded-md">
+        <p className={!errMsg? "err-msg grow" : "hidden"}>{errMsg}</p>
+        <h1 className="grow text-2xl font-bold">Login</h1>
+        <form className="flex flex-col grow gap-5" onSubmit={handleSubmit}>
 
-          <div>
+          <div className="flex flex-col gap-1">
             <label htmlFor="username-input">Username: </label>
             <input 
               type="text"
@@ -76,6 +76,7 @@ export const Login = () => {
               name="username"
               placeholder="Enter Username"
               required
+              className="h-30 border-none indent-1 text-black"
               onChange={e => setUsername(e.target.value)}
               />
             {/* <div id="username-input" className="sr-only">
@@ -83,7 +84,7 @@ export const Login = () => {
             </div> */}
           </div>
 
-          <div>
+          <div className="flex flex-col gap-1">
             <label htmlFor="password-input">Password: </label>
             <input 
               type="password"
@@ -91,16 +92,17 @@ export const Login = () => {
               name="password"
               placeholder="Enter Password"
               required
+              className="h-30 border-none indent-1 text-black"
               onChange={e => setPassword(e.target.value)}
               />
             {/* <div id="password-input" className="sr-only">
               Please enter a password. It must contain at least 8 characters.
             </div> */}
           </div>
-          <button className="btn-login">Submit</button>
+          <button className="h-10 border-none rounded-md bg-white text-black my-2">Submit</button>
         </form>
 
-        <p>Need an account?<br />
+        <p className="grow">Need an account?<br />
           <Link to="/register ">
             Sign Up
           </Link>
