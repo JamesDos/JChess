@@ -17,13 +17,6 @@ import promoteSound from "../../assets/audio/promote.mp3";
 import checkSound from "../../assets/audio/move-check.mp3";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
-// export interface GameProps {
-//   room: string, 
-//   orientation: BoardOrientation | string, 
-//   players: {id: string}[],
-//   cleanup: () => void,
-// }
-
 interface moveData {
   from: string,
   to: string, 
@@ -71,8 +64,6 @@ export const Game = () => {
       }
     }
   }, [chess])
-
-
 
   const playMoveAudio = useCallback((move: Move) => {
     if (chess.inCheck()) {
@@ -279,8 +270,11 @@ export const Game = () => {
   }
 
   return (
-    <div className="game">
-      <div className="board">
+    <div className="grid grid-cols-4 h-screen place-items-center">
+      <div className="col-span-1">
+        Hello
+      </div>
+      <div className="col-span-2 size-5/6">
         <Chessboard 
           position={draggable ? position : displayPosition}
           onPieceDrop={handleDropPiece} 
@@ -292,13 +286,16 @@ export const Game = () => {
           boardOrientation={orientation as BoardOrientation}
         />
       </div>
-      <MoveDisplay
-        history={gameHistory}
-        setBoard={handleSetBoardToPos}
-        selectedMoveNum={moveCount}
-        setSelectedMoveNum={setMoveCount}
-        resetSquares={resetHighlightedSquares}
+      <div className="col-span1">
+        <MoveDisplay
+          history={gameHistory}
+          setBoard={handleSetBoardToPos}
+          selectedMoveNum={moveCount}
+          setSelectedMoveNum={setMoveCount}
+          resetSquares={resetHighlightedSquares}
+          players={players}
         />
+      </div>
       <div>
         {players.map(player => player.username)}
       </div>

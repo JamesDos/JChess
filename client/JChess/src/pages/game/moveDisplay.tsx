@@ -3,16 +3,18 @@ import back1 from "../../assets/images/back1.png";
 import backFull from "../../assets/images/backFull.png";
 import forward1 from "../../assets/images/forward1.png";
 import forwardFull from "../../assets/images/forwardFull.png";
-import { Move } from "chess.js"
+import { Move } from "chess.js";
+import { Player } from "../../contexts/GameSetUpProvider";
 
-import "./moveDisplay.css";
+// import "./moveDisplay.css";
 
 export interface MoveDisplayProps {
   history: Move[],
   setBoard: (pos: string) => void,
   selectedMoveNum: number,
   setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>,
-  resetSquares: () => void
+  resetSquares: () => void,
+  players: Player[],
 }
 
 export const MoveDisplay = (props: MoveDisplayProps) => {
@@ -24,8 +26,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   }
 
   const moveForwardOne = useCallback(() => {
-    console.log(props.selectedMoveNum)
-    console.log(props.history.length)
     if (props.selectedMoveNum < props.history.length) {
       // selectedMoveNum - 1 === index of position in history
       // Thus, index of next move === selectedMoveNum
@@ -95,40 +95,74 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     const whiteHalfMove = (index > 0) ? ((index + 1) * 2) - 1 : 1
     const blackHalfMove = (index > 0) ? ((index + 1) * 2) : 2
     return (
-      <div key={index} className="move-display--rowitem">
-        <div className="move-display--rowitem--turn">{rowItem.turn}</div>
-        <div 
+      <div key={index} className="grid place-items-stretch grid-cols-5">
+        <div className="flex justify-center col-span-1 bg-lighter-grey">{rowItem.turn}</div>
+        
+        {rowItem.white && <div 
           onClick={() => handleClickMove(rowItem.afterWhiteMovePos, whiteHalfMove)}
-          className={`move-display--rowitem--move ${whiteHalfMove == props.selectedMoveNum ? "selected" : ""}`}>{rowItem.white}</div>
-        <div 
+          className={`pl-4 ${whiteHalfMove == props.selectedMoveNum ? "bg-selected-blue" : ""} 
+          col-span-2 hover:bg-hover-blue cursor-pointer`}>
+        {rowItem.white}</div>}
+        {rowItem.black && <div 
           onClick={() => handleClickMove(rowItem.afterBlackMovePos, blackHalfMove)}
-          className={`move-display--rowitem--move ${blackHalfMove == props.selectedMoveNum ? "selected" : ""}`}>{rowItem.black}</div>
+          className={`pl-4 ${blackHalfMove == props.selectedMoveNum ? "bg-selected-blue" : ""} 
+          col-span-2 hover:bg-hover-blue cursor-pointer`}>
+        {rowItem.black}</div>}
       </div>
     )
   })
 
   return (
-    <div className="move-display-container">
-      <div className="move-display--forward-btns-container">
-          <button className="move-display--forward-btns back-full-btn"
-            onClick={moveBackwardsFull}>
-            <img src={backFull} alt="back-full"/>
-          </button>
-          <button className="move-display--forward-btns back-one-btn"
-            onClick={moveBackwardsOne}>
-            <img src={back1} alt="back-one"/>
-          </button>
-          <button className="move-display--forward-btns forward-one-btn"
-            onClick={moveForwardOne}
-          >
-            <img src={forward1} alt="forward-one"/>
-          </button>
-          <button className="move-display--forward-btns forward-full-btn"
-            onClick={moveForwardFull}>
-            <img src={forwardFull} alt="forward-full"/>
-          </button>
+    <div className="flex flex-col bg-light-grey overflow-scroll no-scrollbar h-full">
+      <div>
+        Black Player
+      </div>
+      <div className="flex items-center w-full h-8 sticky top-0">
+        <ForwardButton 
+          onClick={moveBackwardsFull}
+          imgSrc={backFull}
+          alt={"back-full"}
+        />
+        <ForwardButton
+          onClick={moveBackwardsOne}
+          imgSrc={back1}
+          alt={"back-one"}
+        />
+        <ForwardButton
+          onClick={moveForwardOne}
+          imgSrc={forward1}
+          alt={"forward-one"}
+        />
+        <ForwardButton
+          onClick={moveForwardFull}
+          imgSrc={forwardFull}
+          alt={"forward-full"}
+        />
       </div>
       {rowItemListElms}
+      <div>
+        White Player
+      </div>
     </div>
+  )
+}
+
+interface ForwardButtonProps {
+  onClick: () => void,
+  imgSrc: string,
+  alt: string
+}
+
+const ForwardButton = (props: ForwardButtonProps) => {
+  return (
+    <button
+      className="flex justify-center items-center flex-1 hover:bg-green cursor-pointer
+      border-none bg-light-grey"
+      onClick={props.onClick}>
+      <img 
+        className="max-w-full max-h-full"
+        src={props.imgSrc} 
+        alt={props.alt} />
+    </button>
   )
 }

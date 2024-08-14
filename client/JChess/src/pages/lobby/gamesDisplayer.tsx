@@ -18,7 +18,7 @@ export const GamesDisplayer = (props: GamesDisplayerProps) => {
   }
 
   return (
-    <section className="flex flex-col h-full w-3/5">
+    <section className="flex flex-col h-full w-3/5 mt-4">
       <GamesDisplayerNavbar
         toggle={toggleActiveDisplay}
         displayStates={displayStates}
@@ -98,11 +98,11 @@ const ActiveGamesDisplay = (props: ActiveGamesDisplay) => {
   )
 }
 
-interface CreateGamesDisplay {
+interface CreateGamesDisplayProps {
   createGame: (e: React.MouseEvent) => void,
 }
 
-const CreateGamesDisplay = (props: CreateGamesDisplay) => {
+const CreateGamesDisplay = (props: CreateGamesDisplayProps) => {
   return (
     <div className="flex justify-center items-center grow rounded-lg bg-lighter-grey
      hover:bg-orange">

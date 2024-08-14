@@ -12,6 +12,9 @@ export default {
         "lighter-grey": "#302e2c",
         "text-white": "#adadad",
         "orange": "#D64F00",
+        "green": "#5d8d25",
+        "hover-blue": "#3792e8",
+        "selected-blue": "#283947"
       },
       fontFamily: {
         "Noto Sans": ["Noto Sans"]

@@ -6,7 +6,7 @@ import { Register } from "./pages/Register/register";
 import { Home } from "./pages/Home/home";
 import { PrivateRoutes } from "./utils/PrivateRoutes";
 import { AuthProvider } from "./contexts/AuthProvider";
-import { GameSetUpProvider } from "./contexts/GameSetUpProvider";
+import { AnalysisPage } from "./pages/Analysis/analysis";
 import { GameContextLayout } from "./utils/gameContextLayout";
 import PersistLogin from "./utils/persistLogin";
 import { Navbar } from "./components/navbar";
@@ -30,6 +30,7 @@ const App = () => {
                   <Route path="/lobby" element={<Lobby/>}/>
                   <Route path="/game" element={<Game/>}/>
                 </Route>
+                <Route path="/analysis" element={<AnalysisPage/>}/>
               </Route>
     
             </Route>

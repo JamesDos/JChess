@@ -7,7 +7,7 @@ import useAuth from "../hooks/useAuth";
 
 export const GameSetUpContext = createContext<gameContextType | null>(null)
 
-interface Player {
+export interface Player {
   username: string
 }
 
