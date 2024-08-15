@@ -79,6 +79,7 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   const { username } = useAuth() 
 
   useEffect(() => {
+    console.log(`curr username is ${username}`)
     console.log(`socket is ${socket?.id}`)
     if (!socket) {
       console.log(`no socket in useSocket.`)

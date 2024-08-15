@@ -47,17 +47,18 @@ export const SocketProvider = ({children}: {children: React.ReactNode}) => {
     })
 
     socket.on("connect", () => {
-      console.log("in useSocket connect")
+      console.log("connecting socket...")
       setSocket(socket)
+      socket.emit("rejoin-game")
     })
 
     socket.on("disconnect", () => {
-      console.log("in useSocket disconnect")
+      console.log("disconnecting socket...")
       setSocket(null)
     })
 
     return () => {
-      console.log("in useSocket cleanup")
+      console.log("closing socket...")
       socket?.close()
     }
 

@@ -1,5 +1,8 @@
 export const CREATE_GAME = "create-game"
 export const MOVE = "move"
 export const JOIN_GAME = "join-game"
+export const INIT_GAME = "init-game"
 export const GAME_OVER = "game-over"
 export const GAME_RESIGN = "game-resign"
+export const USER_DISCONNECT = "user-disconnect"
+export const USER_RECONNECT = "user-reconnect"

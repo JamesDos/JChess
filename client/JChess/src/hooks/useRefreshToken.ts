@@ -1,5 +1,11 @@
 import axiosInstance from "../api/axios";
 import useAuth from "./useAuth";
+import { jwtDecode } from "jwt-decode";
+
+interface JWTClaimsType {
+  username: string,
+  id: string
+}
 
 const useRefreshToken = () => {
   const { setAuth } = useAuth()
@@ -10,12 +16,18 @@ const useRefreshToken = () => {
       "/refresh", 
       {withCredentials: true}
     )
-    setAuth(prev => ({
-      username: prev?.username || "",
-      password: prev?.password || "", 
-      accessToken: response.data.accessToken,
-    }))
-    return response.data.accessToken
+    const token = response.data.accessToken
+    try {
+      const decoded = jwtDecode<JWTClaimsType>(token)
+      setAuth(prev => ({
+        username: decoded.username|| "",
+        password: prev?.password || "", 
+        accessToken: response.data.accessToken,
+      }))
+      return response.data.accessToken
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   return refresh

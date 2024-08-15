@@ -48,7 +48,11 @@ class GameManager {
       return
     }
     this.users = this.users.filter(user => user.socket.id !== socket.id)
-    socketManager.removeUser(user)
+    socketManager.removeUser(user.id)
+  }
+
+  getUser(userId: string) {
+    return this.users.find(u => u.id === userId)
   }
 
   findGamesWithUser(user: GameUser) {
@@ -57,6 +61,29 @@ class GameManager {
 
   getAllPendingGames() {
     return this.games.filter(g => g.status === "PENDING")
+  }
+
+  getAllActiveUserGames(user: GameUser) {
+    console.log(`Curr user id is ${user.id}`)
+    const activeGames = this.games.find(g => { 
+      return (g.status === "ONGOING") && (g.player1UserId === user.id || g.player2UserId === user.id)
+    })
+    console.log("logging all active games:")
+    this.getAllGames().forEach(g => {
+      console.log(`gameId: ${g.id} status: ${g.status} white: ${g.white} black: ${g.black}`)
+    })
+    return activeGames
+  }
+
+  getAllGames() {
+    return (
+      this.games.map(g => ({
+        id: g.gameId,
+        status: g.status,
+        white: g.player1UserId,
+        black: g.player2UserId,
+      }))
+    )
   }
 
 }

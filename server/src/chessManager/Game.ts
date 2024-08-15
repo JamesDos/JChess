@@ -3,7 +3,7 @@ import { Chess, Move } from "chess.js";
 import { v4 as uuidv4 } from 'uuid';
 import { socketManager } from "./SocketManager";
 import { GameUser } from "./SocketManager";
-import { GAME_OVER, JOIN_GAME, MOVE, GAME_RESIGN } from "./messages";
+import { GAME_OVER, JOIN_GAME, MOVE, GAME_RESIGN, USER_RECONNECT, INIT_GAME } from "./messages";
 import { gameModel as DBGame } from "../models/game";
 import { moveModel as DBMove } from "../models/move";
 import User from "../models/user";
@@ -38,15 +38,12 @@ export class Game {
   }
 
   async addPlayer2(player2UserId: string) {
-    this.player2UserId = player2UserId
-    this.status = "ONGOING"
-    this.setPgnHeaders()
 
     let whitePlayer
     let blackPlayer
     try {
       whitePlayer = await User.findById(this.player1UserId)
-      blackPlayer = await User.findById(this.player2UserId)
+      blackPlayer = await User.findById(player2UserId)
     } catch (err) {
       console.error(err)
     }
@@ -55,6 +52,11 @@ export class Game {
       console.log("whitePlayer or blackPlayer ids not found in db when joining game!")
       return
     }
+
+    this.player2UserId = player2UserId
+    this.player2Username = blackPlayer.username
+    this.status = "ONGOING"
+    this.setPgnHeaders()
 
     try {
       await this.createGameInDb()
@@ -77,6 +79,24 @@ export class Game {
             username: blackPlayer.username,
             id: this.player2UserId
           }
+        }
+      })
+    )
+
+    this.broadcastCurrentGameState()
+  }
+
+  broadcastCurrentGameState() {
+    socketManager.broadcast(
+      this.gameId,
+      JSON.stringify({
+        type: INIT_GAME,
+        payload: {
+          position: this.chess.fen(),
+          turn: this.chess.turn(),
+          history: this.chess.history({verbose: true}),
+          moveCount: this.moveNumber,
+          status: this.status
         }
       })
     )
@@ -200,6 +220,56 @@ export class Game {
         }
       })
     )
+  }
+
+  restoreGameState(user: GameUser) {
+    socketManager.emitToUser(
+      user,
+      JSON.stringify({
+        type: JOIN_GAME,
+        payload: {
+          gameId: this.gameId,
+          white: {
+            username: this.player1Username,
+            id: this.player1UserId
+          },
+          black: {
+            username: this.player2Username,
+            id: this.player2UserId
+          }
+        }
+      })
+    )
+
+    socketManager.emitToUser(
+      user,
+      JSON.stringify({
+        type: USER_RECONNECT,
+        payload: {
+          position: this.chess.fen(),
+          draggable: (this.chess.turn() === "w" && user.id === this.player1UserId) ||  
+                      (this.chess.turn() === "b" && user.id === this.player2UserId),
+          history: this.chess.history({verbose: true}),
+          moveCount: this.moveNumber,
+          status: this.status
+        }
+      })
+    )
+    // socketManager.broadcast(
+    //   this.gameId,
+    //   JSON.stringify({
+    //     type: USER_RECONNECT,
+    //     payload: {
+    //       position: this.chess.fen(),
+    //       draggable: (this.chess.turn() === "w" && user.id === this.player1UserId) ||  
+    //                   (this.chess.turn() === "b" && user.id === this.player2UserId),
+    //       history: this.chess.history({verbose: true}),
+    //       moveCount: this.moveNumber,
+    //       status: this.status
+    //     }
+    //   })
+    // )
+
   }
 
   resign(user: GameUser) {

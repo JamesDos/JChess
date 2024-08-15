@@ -115,7 +115,7 @@ export const getAllPendingGames = (req: Request, res: Response) => {
     {
       gameId: game.gameId,
       whiteUsername: game.player1Username,
-      whilteId: game.player1UserId
+      whiteId: game.player1UserId
     }
   ))
   res.json(gameData)

@@ -10,6 +10,10 @@ export class GameUser {
     this.id = id
     this.username = username
   }
+
+  setSocket(socket: Socket) {
+    this.socket = socket
+  }
 }
 
 class SocketManager {
@@ -53,21 +57,27 @@ class SocketManager {
     })
   }
 
-  removeUser(user: GameUser) {
-    const roomId = this.userToRoom.get(user.id)
+  emitToUser(user: GameUser, message: string) {
+    user.socket.send(message)
+  }
+
+  removeUser(userId: string) {
+    const roomId = this.userToRoom.get(userId)
     if (!roomId) {
       console.error("user not in any rooms")
       return
     }
     const userList = this.roomToUsers.get(roomId) || []
-    const remainingUsers = userList.filter(u => u.id !== user.id)
+    const remainingUsers = userList.filter(u => u.id !== userId)
     if (remainingUsers.length === 0) {
       this.roomToUsers.delete(roomId)
+      console.log("DELETING ROOM")
     } else {
       this.roomToUsers.set(roomId, remainingUsers)
     }
-    this.userToRoom.delete(user.id)
+    this.userToRoom.delete(userId)
   }
+
 }
 
 export const socketManager = SocketManager.getInstance()

@@ -36,8 +36,15 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
     console.error(`decoded id is not defined. decoded username is ${decoded.username}`)
   }
 
-  const user = new GameUser(socket, decoded.id, decoded.username);
-  gameManager.addUser(user);
+  let user = gameManager.getUser(decoded.id)
+  if (!user) {
+    console.log("making new user....")
+    user = new GameUser(socket, decoded.id, decoded.username);
+    gameManager.addUser(user);
+  } else {
+    console.log("updating user socket to new socket")
+    user.setSocket(socket)
+  }
 
   socket.on("create-game", (cb) => {
     console.log("Handler 'create-game' triggered");
@@ -82,6 +89,19 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       console.log("cannot join game that is full!")
     }
   });
+
+  socket.on("rejoin-game", async (data) => {
+    console.log("Handle 'rejoin-game' triggered");
+    const activeGame = gameManager.getAllActiveUserGames(user)
+    console.log(`Active games are ${activeGame}`)
+    if (!activeGame) {
+      console.log("user not in any games before disconnect!")
+      return
+    }
+    console.log(`rejoining game with gameid ${activeGame.gameId}`)
+    // socketManager.addUser(user, activeGame.gameId)
+    activeGame.restoreGameState(user)
+  })
 
   socket.on("move", async (data) => {
     console.log("Handler 'move' triggered");

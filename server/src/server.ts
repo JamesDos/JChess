@@ -96,7 +96,8 @@ const httpServer = app.listen(PORT, () => {
 export const io = new Server(httpServer, {
   cors: {
     origin: ["http://localhost:5173"]
-  }
+  },
+  connectionStateRecovery: {}
 });
 
 const {
@@ -114,6 +115,11 @@ const {
 const onConnection = (socket: Socket) => {
   console.log('New client connected');
   registerGameHandlers(io, socket)
+  // if (socket.recovered) {
+  //   console.log("recovered")
+  // } else {
+  //   console.log("not recovered")
+  // }
 }
 
 io.on("connection", onConnection)

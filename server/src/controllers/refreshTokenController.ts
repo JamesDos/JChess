@@ -12,7 +12,7 @@ export const handleRefresh = async (req: Request, res: Response) => {
   // Verify that user has refresh token
   const user = await User.findOne({refreshToken: refreshToken})
   if (!user) {
-    res.sendStatus(403) // forbidden
+    return res.sendStatus(403) // forbidden
   }
   // evaluate jwt
   jwt.verify(

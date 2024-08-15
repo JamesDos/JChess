@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useReducer } from "react";
 import { useSound } from "use-sound";
 import { Chessboard } from "react-chessboard";
 import { MoveDisplay } from './moveDisplay';
@@ -24,6 +24,81 @@ interface moveData {
   promotion: string,
 }
 
+interface GameStatePayload {
+  position: string,
+  turn: Color,
+  history: Move[],
+  moveCount: number,
+  status: string,
+}
+
+interface MovePayload {
+  move: Move,
+  history: Move[],
+  moveCount: number,
+  status: string
+}
+
+interface GameStateType {
+  position: string,
+  displayPosition: string,
+  draggable: boolean,
+  gameHistory: Move[],
+  moveCount: number,
+  selectedSquare: Square | null,
+  dottedSquares: Square[],
+  over: string,
+  orientation: string,
+}
+
+type Action =
+| {type: "update-game-state", payload: GameStatePayload}
+| {type: "move", payload: MovePayload}
+
+
+
+const initGameState = (orientation: string) => {
+  const startingGameState: GameStateType = {
+    position: "start",
+    displayPosition: "start",
+    draggable: true,
+    gameHistory: [],
+    moveCount: 1,
+    selectedSquare: null,
+    dottedSquares: [],
+    over: "",
+    orientation: orientation
+  }
+
+  return startingGameState
+}
+
+
+
+
+const reducer = (state: GameStateType, action: Action) => {
+  switch (action.type) {
+    case "update-game-state": {
+      return {
+        ...state,
+        position: action.payload.position,
+        draggable: (action.payload.turn === state.orientation[0]),
+        history: action.payload.history,
+        moveCount: action.payload.moveCount
+      }
+    }
+
+    case "move": {
+      return {
+        
+      }
+    }
+
+    default:
+      throw new Error("Unknown dispatch action type!")
+  }
+}
+
 export const Game = () => {
 
 
@@ -31,6 +106,8 @@ export const Game = () => {
   const { room, orientation, players, dispatch } = useGameSetUp()
 
   const socket = useSocket()
+
+  const [gameState, gameStateDispatch] = useReducer(reducer, orientation, initGameState)
 
   const chess = useMemo(() => new Chess(), []);
   const [displayPosition, setDisplayPosition] = useState('start')
@@ -134,6 +211,15 @@ export const Game = () => {
     socket?.emit("resign", {roomId: room})
   }
 
+  const updateGameState = useCallback((payload: GameStatePayload) => {
+    console.log("restoring game state....")
+    setPosition(payload.position)
+    setDisplayPosition(payload.position)
+    setDraggable(payload.turn === orientation[0])
+    setGameHistory(payload.history)
+    setMoveCount(payload.moveCount)
+  }, [orientation])
+
   // Effects
   useEffect(() => {
     socket?.on("message", (message: string) => {
@@ -144,9 +230,20 @@ export const Game = () => {
       }
       const payload = data.payload
 
+      if (data.type === "init-game") {
+        updateGameState(payload)
+      }
+
       if (data.type === "move") {
         const move = payload.move
         makeMove(move)
+      }
+      
+      if (data.type === "user-reconnect") {
+  
+        console.log(`restored gameState is ${JSON.stringify(payload)}`)
+        updateGameState(payload)
+
       }
 
       if (data.type === "game-over") {
@@ -163,9 +260,7 @@ export const Game = () => {
 
 
     })
-  }, [makeMove, socket, chess])
-
-
+  }, [makeMove, socket, chess, updateGameState])
 
 
   // useEffect(() => {
