@@ -11,22 +11,24 @@ import promoteSound from "../assets/audio/promote.mp3";
 import checkSound from "../assets/audio/move-check.mp3";
 
 export interface GameBoardProps {
-  chess: Chess,
+  inCheck: boolean,
+  possibleMoves: Move[],
+  // chess: Chess,
   position: string,
   draggable: boolean,
   handleMakeMove: (sourceSquare: string, targetSquare: string) => Move | null,
   orientation: BoardOrientation,
-  selectedSquare: Square | null,
-  setSelectedSquare: React.Dispatch<React.SetStateAction<Square | null>>,
-  dottedSquares: Square[] | null,
-  setDottedSquares: React.Dispatch<React.SetStateAction<Square[]>>,
+  // selectedSquare: Square | null,
+  // setSelectedSquare: React.Dispatch<React.SetStateAction<Square | null>>,
+  // dottedSquares: Square[] | null,
+  // setDottedSquares: React.Dispatch<React.SetStateAction<Square[]>>,
 }
 
 export const GameBoard = (props: GameBoardProps) => {
   /** Handles all the display logic for ONLY the chessboard */
 
-  // const [selectedSquare, setSelectedSquare] = useState<Square | null>(null)
-  // const [dottedSquares, setDottedSquares] = useState<Square[]>([])
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null)
+  const [dottedSquares, setDottedSquares] = useState<Square[]>([])
 
   const [playMoveSound] = useSound(moveSound)
   const [playCaptureSound] = useSound(captureSound)

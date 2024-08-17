@@ -8,6 +8,7 @@ import useGameSetUp from "../../hooks/useGameSetUp";
 import { useNavigate } from "react-router-dom";
 // import useLocalStorage from "../../hooks/useLocalStorage";
 import { useSocket } from "../../hooks/useSocket";
+import { GameBoard } from "../../components/gameBoard";
 import './game.css';
 
 import moveSound from "../../assets/audio/move-self.mp3";
@@ -30,14 +31,20 @@ interface GameStatePayload {
   history: Move[],
   moveCount: number,
   status: string,
+  inCheck: boolean,
+  possibleMoves: Move[],
 }
 
-interface MovePayload {
-  move: Move,
-  history: Move[],
-  moveCount: number,
-  status: string
+interface DisplayPosPayload {
+  newMoveNum: number,
+  newDisplayPos: string,
+  
 }
+
+// interface MovePayload extends GameStatePayload {
+//   inCheck: boolean,
+//   possibleMoves: Move[],
+// }
 
 interface GameStateType {
   position: string,
@@ -45,15 +52,16 @@ interface GameStateType {
   draggable: boolean,
   gameHistory: Move[],
   moveCount: number,
-  selectedSquare: Square | null,
-  dottedSquares: Square[],
   over: string,
   orientation: string,
+  inCheck: boolean,
+  possibleMoves: Move[]
+  turn: Color,
 }
 
 type Action =
 | {type: "update-game-state", payload: GameStatePayload}
-| {type: "move", payload: MovePayload}
+| {type: "set-display-pos", payload: }
 
 
 
@@ -64,17 +72,15 @@ const initGameState = (orientation: string) => {
     draggable: true,
     gameHistory: [],
     moveCount: 1,
-    selectedSquare: null,
-    dottedSquares: [],
     over: "",
-    orientation: orientation
+    orientation: orientation,
+    inCheck: false,
+    possibleMoves: [],
+    turn: "w"
   }
 
   return startingGameState
 }
-
-
-
 
 const reducer = (state: GameStateType, action: Action) => {
   switch (action.type) {
@@ -82,17 +88,18 @@ const reducer = (state: GameStateType, action: Action) => {
       return {
         ...state,
         position: action.payload.position,
+        displayPosition: action.payload.position,
         draggable: (action.payload.turn === state.orientation[0]),
         history: action.payload.history,
-        moveCount: action.payload.moveCount
+        moveCount: action.payload.moveCount,
+        inCheck: action.payload.inCheck,
+        possibleMoves: action.payload.possibleMoves,
+        turn: action.payload.turn,
       }
+    
     }
 
-    case "move": {
-      return {
-        
-      }
-    }
+
 
     default:
       throw new Error("Unknown dispatch action type!")
@@ -183,8 +190,31 @@ export const Game = () => {
     }
   }, [chess, checkGameOver, playMoveAudio])
 
+  // const handleMakeMove = (sourceSquare: string, targetSquare: string) => {
+  //   if (chess.turn() != orientation[0]) { // chess.turn is 'w' || 'b'
+  //     console.log("Not your turn!")
+  //     return false // prevents players from moving other player's pieces
+  //   }
+  //   if (players.length < 2) { // prevents move if both players not connected
+  //     console.log(`At least one player has not connected. Curr players are ${players}`)
+  //     return false
+  //   }
+  //   const moveData = {
+  //     from: sourceSquare,
+  //     to: targetSquare,
+  //     color: chess.turn(),
+  //     promotion: 'q' // always promote to queen for simplicity
+  //   }
+  //   const move = makeMove(moveData)
+  //   if (move === null) {
+  //     return false
+  //   }
+  //   socket?.emit("move", { move: move, roomId: room })
+  //   return true
+  // }
+
   const handleMakeMove = (sourceSquare: string, targetSquare: string) => {
-    if (chess.turn() != orientation[0]) { // chess.turn is 'w' || 'b'
+    if (gameState.turn != gameState.orientation[0]) { // chess.turn is 'w' || 'b'
       console.log("Not your turn!")
       return false // prevents players from moving other player's pieces
     }
@@ -195,7 +225,7 @@ export const Game = () => {
     const moveData = {
       from: sourceSquare,
       to: targetSquare,
-      color: chess.turn(),
+      color: gameState.turn,
       promotion: 'q' // always promote to queen for simplicity
     }
     const move = makeMove(moveData)
@@ -380,6 +410,14 @@ export const Game = () => {
           onPieceDragBegin={handlePieceDragBegin}
           boardOrientation={orientation as BoardOrientation}
         />
+        <GameBoard
+          inCheck={gameState.inCheck}
+          possibleMoves={gameState.possibleMoves}
+          position={gameState.position}
+          draggable={gameState.draggable}
+          handleMakeMove={handleMakeMove}
+          orientation={gameState.orientation}
+        />
       </div>
       <div className="col-span1">
         <MoveDisplay
@@ -389,6 +427,9 @@ export const Game = () => {
           setSelectedMoveNum={setMoveCount}
           resetSquares={resetHighlightedSquares}
           players={players}
+        />
+        <MoveDisplay
+          history={gameState.history}
         />
       </div>
       <div>
