@@ -38,7 +38,7 @@ interface GameStatePayload {
 interface DisplayPosPayload {
   newMoveNum: number,
   newDisplayPos: string,
-  
+
 }
 
 // interface MovePayload extends GameStatePayload {
@@ -61,7 +61,6 @@ interface GameStateType {
 
 type Action =
 | {type: "update-game-state", payload: GameStatePayload}
-| {type: "set-display-pos", payload: }
 
 
 
@@ -352,16 +351,16 @@ export const Game = () => {
     return madeMove
   }
 
-  const handleSquareClick = (sqaure: Square) => {
+  const handleSquareClick = (square: Square) => {
     if (!selectedSquare || !draggable) {
       return
     }
-    if (dottedSquares.includes(sqaure)) {
-      handleMakeMove(selectedSquare, sqaure)
+    if (dottedSquares.includes(square)) {
+      handleMakeMove(selectedSquare, square)
       setSelectedSquare(null)
-      setDottedSquares([selectedSquare, sqaure])
+      setDottedSquares([selectedSquare, square])
     } else {
-      updateHighlightedSquares(sqaure)
+      updateHighlightedSquares(square)
     }
   }
 

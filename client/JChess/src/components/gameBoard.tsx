@@ -3,6 +3,8 @@ import { Chessboard } from "react-chessboard";
 import { Chess, Square, Move } from 'chess.js';
 import { useState } from "react";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
+import { Action } from "./boardDisplay";
+import { ValidSquares } from "./boardDisplay";
 
 import moveSound from "../assets/audio/move-self.mp3";
 import captureSound from "../assets/audio/capture.mp3";
@@ -12,23 +14,25 @@ import checkSound from "../assets/audio/move-check.mp3";
 
 export interface GameBoardProps {
   inCheck: boolean,
-  possibleMoves: Move[],
+  validSquares: ValidSquares,
   // chess: Chess,
   position: string,
+  displayPosition: string,
   draggable: boolean,
-  handleMakeMove: (sourceSquare: string, targetSquare: string) => Move | null,
+  handleMakeMove: (sourceSquare: Square, targetSquare: Square) => Move | undefined,
   orientation: BoardOrientation,
-  // selectedSquare: Square | null,
-  // setSelectedSquare: React.Dispatch<React.SetStateAction<Square | null>>,
-  // dottedSquares: Square[] | null,
-  // setDottedSquares: React.Dispatch<React.SetStateAction<Square[]>>,
+  selectedSquare: Square | null,
+  dottedSquares: Square[],
+  dispatch: React.Dispatch<Action>,
+}
+
+interface ExtendedMove extends Move {
+  inCheck: boolean
 }
 
 export const GameBoard = (props: GameBoardProps) => {
   /** Handles all the display logic for ONLY the chessboard */
 
-  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null)
-  const [dottedSquares, setDottedSquares] = useState<Square[]>([])
 
   const [playMoveSound] = useSound(moveSound)
   const [playCaptureSound] = useSound(captureSound)
@@ -36,8 +40,8 @@ export const GameBoard = (props: GameBoardProps) => {
   const [playPromoteSound] = useSound(promoteSound)
   const [playCheckSound] = useSound(checkSound)
 
-  const playMoveAudio = (move: Move) => {
-    if (props.chess.inCheck()) {
+  const playMoveAudio = (move: ExtendedMove) => {
+    if (move.inCheck) {
       playCheckSound()
       return;
     }
@@ -62,14 +66,20 @@ export const GameBoard = (props: GameBoardProps) => {
 
   // Helper functions
   const getPossibleMoves = (square: Square) => {
-    return props.chess.moves({square: square, verbose: true}).map(move => move.to)
+    return props.validSquares[square].squares
   }
 
-  const updateHighlightedSquares = (sqaure: Square) => {
-    props.setSelectedSquare(sqaure)
-    props.setDottedSquares(getPossibleMoves(sqaure))
+  const updateHighlightedSquares = (square: Square) => {
+    props.dispatch({
+      type: "update-highlighted-squares",
+      payload: {
+        square: square,
+        newDottedSquares: getPossibleMoves(square)
+      }
+    })
   }
 
+  
   // Event handlers
   const handleDropPiece = (sourceSquare: Square, targetSquare: Square) => {
     const move = props.handleMakeMove(sourceSquare, targetSquare)
@@ -78,8 +88,13 @@ export const GameBoard = (props: GameBoardProps) => {
     }
     playMoveAudio(move)
     if (props.dottedSquares && props.dottedSquares.includes(targetSquare)) {
-      props.setSelectedSquare(null)
-      props.setDottedSquares([sourceSquare, targetSquare])
+      props.dispatch({
+        type: "update-highlighted-squares",
+        payload: {
+          square: null,
+          newDottedSquares: [sourceSquare, targetSquare]
+        }
+      })
     }
     return true
   }
@@ -89,9 +104,18 @@ export const GameBoard = (props: GameBoardProps) => {
       return
     }
     if (props.dottedSquares && props.dottedSquares.includes(square)) {
-      props.handleMakeMove(props.selectedSquare, square)
-      props.setSelectedSquare(null)
-      props.setDottedSquares([props.selectedSquare, square])
+      const move = props.handleMakeMove(props.selectedSquare, square)
+      if (!move) {
+        return
+      }
+      playMoveAudio(move)
+      props.dispatch({
+        type: "update-highlighted-squares",
+        payload: {
+          square: null,
+          newDottedSquares: [props.selectedSquare, square]
+        }
+      })
     } else {
       updateHighlightedSquares(square)
     }
@@ -125,7 +149,7 @@ export const GameBoard = (props: GameBoardProps) => {
 
   return (
     <Chessboard
-    position={props.position}
+    position={props.draggable ? props.position : props.displayPosition}
     onPieceDrop={handleDropPiece}
     arePiecesDraggable={props.draggable}
     onPieceClick={handlePieceClick}

@@ -5,59 +5,104 @@ import forward1 from "../../assets/images/forward1.png";
 import forwardFull from "../../assets/images/forwardFull.png";
 import { Move } from "chess.js";
 import { Player } from "../../contexts/GameSetUpProvider";
+import { Action } from "../../components/boardDisplay";
 
 // import "./moveDisplay.css";
 
 export interface MoveDisplayProps {
   history: Move[],
-  setBoard: (pos: string) => void,
+  // setBoard: (pos: string) => void,
   selectedMoveNum: number,
-  setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>,
-  resetSquares: () => void,
-  players: Player[],
+  // setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>,
+  // resetSquares: () => void,
+  players?: Player[],
+  dispatch: React.Dispatch<Action>,
 }
 
 export const MoveDisplay = (props: MoveDisplayProps) => {
 
   const handleClickMove = (pos: string, halfMoveCount: number) => {
-    props.setBoard(pos)
-    props.setSelectedMoveNum(halfMoveCount)
-    props.resetSquares()
+    console.log(pos)
+    props.dispatch({
+      type: "update-display-pos",
+      payload: {
+        newDisplayPos: pos,
+        newMoveNum: halfMoveCount,
+        draggable: halfMoveCount == props.history.length,
+      }
+    })
+    // props.setBoard(pos)
+    // props.setSelectedMoveNum(halfMoveCount)
+    // props.resetSquares()
   }
 
   const moveForwardOne = useCallback(() => {
     if (props.selectedMoveNum < props.history.length) {
       // selectedMoveNum - 1 === index of position in history
       // Thus, index of next move === selectedMoveNum
-      props.setSelectedMoveNum(prevNum => prevNum + 1)
-      props.setBoard(props.history[props.selectedMoveNum].after)
-      props.resetSquares()
+      props.dispatch({
+        type: "update-display-pos",
+        payload: {
+          newDisplayPos: props.history[props.selectedMoveNum].after,
+          newMoveNum: props.selectedMoveNum + 1,
+          draggable: props.selectedMoveNum + 1 === props.history.length,
+        }
+      })
+      // props.setSelectedMoveNum(prevNum => prevNum + 1)
+      // props.setBoard(props.history[props.selectedMoveNum].after)
+      // props.resetSquares()
     }
   }, [props])
 
   const moveForwardFull = () => {
     if (props.selectedMoveNum < props.history.length) {
-      props.setSelectedMoveNum(props.history.length)
-      props.setBoard(props.history[props.history.length - 1].after)
-      props.resetSquares()
+      props.dispatch({
+        type: "update-display-pos",
+        payload: {
+          newDisplayPos: props.history[props.history.length - 1].after,
+          newMoveNum: props.history.length,
+          draggable: true,
+        }
+      })
+      // props.setSelectedMoveNum(props.history.length)
+      // props.setBoard(props.history[props.history.length - 1].after)
+      // props.resetSquares()
     }
   }
 
   const moveBackwardsOne = useCallback(() => {
     if (props.selectedMoveNum > 1) {
-      props.setSelectedMoveNum(prevNum => prevNum - 1)
-      props.setBoard(props.history[props.selectedMoveNum - 2].after)
-      props.resetSquares()
+      props.dispatch({
+        type: "update-display-pos",
+        payload: {
+          newDisplayPos: props.history[props.selectedMoveNum - 2].after,
+          newMoveNum: props.selectedMoveNum - 1,
+          draggable: props.history.length === props.selectedMoveNum - 1,
+        }
+      })
+      // props.setSelectedMoveNum(prevNum => prevNum - 1)
+      // props.setBoard(props.history[props.selectedMoveNum - 2].after)
+      // props.resetSquares()
     }
   }, [props])
 
   const moveBackwardsFull = () => {
     if (props.selectedMoveNum > 1) {
-      props.setSelectedMoveNum(1)
-      props.setBoard(props.history[0].after)
-      props.resetSquares()
+      if (props.selectedMoveNum > 1) {
+        props.dispatch({
+          type: "update-display-pos",
+          payload: {
+            newDisplayPos: props.history[0].after,
+            newMoveNum: 1,
+            draggable: props.history.length === 1
+          }
+        })
+      // props.setSelectedMoveNum(1)
+      // props.setBoard(props.history[0].after)
+      // props.resetSquares()
     }
   }
+}
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

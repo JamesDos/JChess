@@ -1,31 +1,37 @@
 import { GameBoard } from "./gameBoard";
 import { MoveDisplay } from "../pages/Game/moveDisplay";
-import { useState, useReducer } from "react";
+import { useState, useReducer, useEffect, act } from "react";
 import { Move, Color, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 
-interface moveData {
+interface MoveData {
   from: string,
   to: string, 
   color: Color, 
   promotion: string,
 }
 
-interface GameStatePayload {
+export interface GameStatePayload {
   position: string,
   turn: Color,
   history: Move[],
   moveCount: number,
   status: string,
   inCheck: boolean,
-  possibleMoves: Move[],
+  validSquares: ValidSquares,
+  draggable: boolean
 }
 
 interface DisplayPosPayload {
   newMoveNum: number,
   newDisplayPos: string,
-  
+  draggable: boolean,
+}
+
+interface HighlightedSquaresPayload {
+  square: Square | null,
+  newDottedSquares: Square[]
 }
 
 interface GameStateType {
@@ -37,13 +43,22 @@ interface GameStateType {
   over: string,
   orientation: BoardOrientation,
   inCheck: boolean,
-  possibleMoves: Move[]
+  validSquares: ValidSquares, 
   turn: Color,
   selectedSquare: Square | null,
   dottedSquares: Square[]
 }
 
-const initGameState = (orientation: BoardOrientation) => {
+export interface ValidSquares {
+  [key: string]: {squares: Square[]}
+}
+
+interface InitArgsType {
+  orientation: BoardOrientation
+  validSquares: ValidSquares
+}
+
+const initGameState = (initArgs: InitArgsType) => {
   const startingGameState: GameStateType = {
     position: "start",
     displayPosition: "start",
@@ -51,9 +66,9 @@ const initGameState = (orientation: BoardOrientation) => {
     gameHistory: [],
     moveCount: 1,
     over: "",
-    orientation: orientation,
+    orientation: initArgs.orientation,
     inCheck: false,
-    possibleMoves: [],
+    validSquares: initArgs.validSquares,
     turn: "w",
     selectedSquare: null,
     dottedSquares: []
@@ -62,26 +77,43 @@ const initGameState = (orientation: BoardOrientation) => {
   return startingGameState
 }
 
-type Action =
+export type Action =
 | {type: "update-game-state", payload: GameStatePayload}
-| {type: "set-display-pos", payload: DisplayPosPayload}
+| {type: "update-display-pos", payload: DisplayPosPayload}
+| {type: "update-highlighted-squares", payload: HighlightedSquaresPayload}
 
 
-const reducer = (state: GameStateType, action: Action) => {
+const reducer = (state: GameStateType, action: Action): GameStateType => {
   switch (action.type) {
     case "update-game-state": {
       return {
         ...state,
         position: action.payload.position,
         displayPosition: action.payload.position,
-        draggable: (action.payload.turn === state.orientation[0]),
-        history: action.payload.history,
+        draggable: action.payload.draggable,
+        gameHistory: action.payload.history,
         moveCount: action.payload.moveCount,
         inCheck: action.payload.inCheck,
-        possibleMoves: action.payload.possibleMoves,
+        validSquares: action.payload.validSquares,
         turn: action.payload.turn,
       }
-    
+    }
+    case "update-display-pos": {
+      return {
+        ...state,
+        displayPosition: action.payload.newDisplayPos,
+        moveCount: action.payload.newMoveNum,
+        selectedSquare: null,
+        dottedSquares: [],
+        draggable: action.payload.draggable,
+      }
+    }
+    case "update-highlighted-squares": {
+      return {
+        ...state,
+        selectedSquare: action.payload.square,
+        dottedSquares: action.payload.newDottedSquares
+      }
     }
 
     default:
@@ -90,22 +122,53 @@ const reducer = (state: GameStateType, action: Action) => {
 }
 
 export interface BoardDisplayProps {
-  orientation: BoardOrientation
+  orientation: BoardOrientation,
+  recentMove: GameStatePayload | null,
+  validSquares: ValidSquares
+  onMove: (sourceSquare: Square, targetSquare: Square) => Move | undefined
 }
 
 export const BoardDisplay = (props: BoardDisplayProps) => {
 
-  const [gameState, gameStateDispatch] = useReducer(reducer, props.orientation, initGameState)
+  const [gameState, gameStateDispatch] = useReducer(
+    reducer, 
+    {
+      orientation: props.orientation,
+      validSquares: props.validSquares
+    },
+    initGameState)
+
+  useEffect(() => {
+    if (props.recentMove) {
+      gameStateDispatch({
+        type: "update-game-state",
+        payload: props.recentMove
+      })
+    }
+  }, [props.recentMove])
+
+
 
 
   return (
-    <div>
-
+    <div className="size-1/2">
       <GameBoard
-
+        inCheck={gameState.inCheck}
+        position={gameState.position}
+        displayPosition={gameState.displayPosition}
+        draggable={gameState.draggable}
+        validSquares={gameState.validSquares}
+        handleMakeMove={props.onMove}
+        orientation={gameState.orientation}
+        selectedSquare={gameState.selectedSquare}
+        dottedSquares={gameState.dottedSquares}
+        dispatch={gameStateDispatch}
       />
+
       <MoveDisplay
-      
+        history={gameState.gameHistory}
+        selectedMoveNum={gameState.moveCount}
+        dispatch={gameStateDispatch}
       />
 
     </div>
