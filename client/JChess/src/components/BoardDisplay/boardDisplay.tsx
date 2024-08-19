@@ -1,6 +1,6 @@
 import { GameBoard } from "./gameBoard";
-import { MoveDisplay } from "../pages/Game/moveDisplay";
-import { useState, useReducer, useEffect, act } from "react";
+import { MoveDisplay } from "./moveDisplay";
+import { useState, useReducer, useEffect } from "react";
 import { Move, Color, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
@@ -125,7 +125,7 @@ export interface BoardDisplayProps {
   orientation: BoardOrientation,
   recentMove: GameStatePayload | null,
   validSquares: ValidSquares
-  onMove: (sourceSquare: Square, targetSquare: Square) => Move | undefined
+  onMove: (sourceSquare: Square, targetSquare: Square) => {flags: string, inCheck: boolean} | undefined
 }
 
 export const BoardDisplay = (props: BoardDisplayProps) => {
@@ -151,7 +151,7 @@ export const BoardDisplay = (props: BoardDisplayProps) => {
 
 
   return (
-    <div className="size-1/2">
+    <div className="grid grid-cols-2">
       <GameBoard
         inCheck={gameState.inCheck}
         position={gameState.position}
@@ -164,13 +164,11 @@ export const BoardDisplay = (props: BoardDisplayProps) => {
         dottedSquares={gameState.dottedSquares}
         dispatch={gameStateDispatch}
       />
-
       <MoveDisplay
         history={gameState.gameHistory}
         selectedMoveNum={gameState.moveCount}
         dispatch={gameStateDispatch}
       />
-
     </div>
   )
 }

@@ -5,7 +5,7 @@ import forward1 from "../../assets/images/forward1.png";
 import forwardFull from "../../assets/images/forwardFull.png";
 import { Move } from "chess.js";
 import { Player } from "../../contexts/GameSetUpProvider";
-import { Action } from "../../components/boardDisplay";
+import { Action } from "../BoardDisplay/boardDisplay";
 
 // import "./moveDisplay.css";
 
@@ -22,7 +22,6 @@ export interface MoveDisplayProps {
 export const MoveDisplay = (props: MoveDisplayProps) => {
 
   const handleClickMove = (pos: string, halfMoveCount: number) => {
-    console.log(pos)
     props.dispatch({
       type: "update-display-pos",
       payload: {

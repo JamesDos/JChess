@@ -1,9 +1,9 @@
-import { MoveDisplay } from "../Game/moveDisplay"
-import { GameBoard } from "../../components/gameBoard";
+import { MoveDisplay } from "../../components/moveDisplay"
+import { GameBoard } from "../../components/BoardDisplay/gameBoard";
 import { Chess, Square, Move, Color, SQUARES} from 'chess.js';
 import { useState, useMemo, useCallback } from "react";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
-import { BoardDisplay } from "../../components/boardDisplay";
+import { BoardDisplay } from "../../components/BoardDisplay/boardDisplay";
 
 interface MoveData {
   from: string,
@@ -95,7 +95,8 @@ export interface GameStatePayload {
   moveCount: number,
   status: string,
   inCheck: boolean,
-  validSquares: ValidSquares
+  validSquares: ValidSquares,
+  draggable: boolean,
 }
 
 export interface ValidSquares {
@@ -149,7 +150,6 @@ export const AnalysisPage = () => {
         to: targetSquare,
         promotion: 'q' 
       })
-      console.log(`In check is ${chess.inCheck()}`)
       const payload = {
         position: chess.fen(),
         turn: chess.turn(),
@@ -163,7 +163,7 @@ export const AnalysisPage = () => {
       setRecentMove(payload)
       setValidSquares(getValidSquares())
        // draggable: (action.payload.turn === state.orientation[0]),
-      return {...move, inCheck: chess.inCheck()}
+      return { flags: move.flags, inCheck: chess.inCheck() }
     } catch (err) {
       console.error(err)
     }
@@ -179,7 +179,6 @@ export const AnalysisPage = () => {
         recentMove={recentMove}
         orientation={orientation}
         validSquares={validSquares}
-      
       />
     </main>
   )

@@ -79,7 +79,6 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   const { username } = useAuth() 
 
   useEffect(() => {
-    console.log(`curr username is ${username}`)
     console.log(`socket is ${socket?.id}`)
     if (!socket) {
       console.log(`no socket in useSocket.`)
@@ -87,7 +86,7 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
     }
 
     socket.on("message", (message: string) => {
-      console.log("in message!")
+      console.log(`in message ${JSON.parse(message).type}`)
       const data = JSON.parse(message)
       if (!data.type || !data.payload) {
         console.error("bad message! type field not includeded")
@@ -99,6 +98,7 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
       }
 
       if (data.type === "join-game") {
+        console.log("in join game")
         const players = [{username: payload.white.username}, {username: payload.black.username}]
         if (payload.white.username === username) {
           dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
@@ -109,8 +109,26 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
           return
         }
         console.log(`players in game are ${players[0].username} ${players[1].username}`)
+        
         navigate("/game")
       }
+
+      // if (data.type === "rejoin-game") {
+      //   console.log("in rejoin game")
+      //   const players = [{username: payload.white.username}, {username: payload.black.username}]
+      //   if (payload.white.username === username) {
+      //     dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
+      //     console.log("setting white orientation")
+      //   } else if (payload.black.username === username) {
+      //     dispatch({type:"join-room", room: payload.gameId, orientation: "black", newPlayers: players})
+      //     console.log("setting black orientation")
+      //   } else {
+      //     console.error("username not in join-game payload!")
+      //     return
+      //   }
+      //   console.log(`players in game are ${players[0].username} ${players[1].username}`)
+      //   socket.emit("reconnect-user")
+      // }
 
       
     })

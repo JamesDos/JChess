@@ -1,15 +1,25 @@
 import { Socket } from "socket.io";
-import { Chess, Move } from "chess.js";
+import { Chess, Move, Square, SQUARES } from "chess.js";
 import { v4 as uuidv4 } from 'uuid';
 import { socketManager } from "./SocketManager";
 import { GameUser } from "./SocketManager";
-import { GAME_OVER, JOIN_GAME, MOVE, GAME_RESIGN, USER_RECONNECT, INIT_GAME } from "./messages";
+import { GAME_OVER, JOIN_GAME, MOVE, GAME_RESIGN, USER_RECONNECT, INIT_GAME, REJOIN_GAME } from "./messages";
 import { gameModel as DBGame } from "../models/game";
 import { moveModel as DBMove } from "../models/move";
 import User from "../models/user";
 
 export type GameStatus = "ONGOING" | "PENDING" | "COMPLETED" | "ABANDONED" | "ABORT"
 export type GameResult = "WHITE_WIN" | "BLACK_WIN" | "DRAW"
+
+interface MovePayload {
+  from: string,
+  to: string,
+  promotion: string
+}
+
+interface ValidSquares {
+  [key: string]: {squares: Square[]}
+}
 
 export class Game {
 
@@ -83,23 +93,7 @@ export class Game {
       })
     )
 
-    this.broadcastCurrentGameState()
-  }
-
-  broadcastCurrentGameState() {
-    socketManager.broadcast(
-      this.gameId,
-      JSON.stringify({
-        type: INIT_GAME,
-        payload: {
-          position: this.chess.fen(),
-          turn: this.chess.turn(),
-          history: this.chess.history({verbose: true}),
-          moveCount: this.moveNumber,
-          status: this.status
-        }
-      })
-    )
+    this.emitCurrGameState(INIT_GAME)
   }
 
   async createGameInDb() {
@@ -145,7 +139,40 @@ export class Game {
     await DBGame.findOneAndUpdate({gameId: this.gameId}, {currentPosition: move.after})
   }
 
-  async makeMove(user: GameUser, move: Move) {
+  getCurrGameState() {
+    const getValidSquares = () => {
+      const res: ValidSquares = {}
+      SQUARES.forEach(square => {
+        const validSquares = this.chess.moves({square: square, verbose: true}).map(move => move.to)
+        res[square] = {squares: validSquares}
+      })
+      return res
+    }
+
+    return {
+      position: this.chess.fen(),
+      turn: this.chess.turn(),
+      history: this.chess.history({verbose: true}),
+      moveNumber: this.moveNumber,
+      inCheck: this.chess.inCheck(),
+      status: this.status,
+      draggable: true,
+      validSquares: getValidSquares(),
+    }
+  }
+
+
+  emitCurrGameState(type: string) {
+    socketManager.broadcast(
+      this.gameId,
+      JSON.stringify({
+        type: type, 
+        payload: this.getCurrGameState()
+      })
+    )
+  }
+
+  async makeMove(user: GameUser, moveData: MovePayload) {
     // move validation (ensures white can't move black's pieces and vice versa)
     if (this.chess.turn() == "w" && user.id !== this.player1UserId) {
       return 
@@ -159,11 +186,13 @@ export class Game {
       return
     }
 
+    let move: Move
     try {
-      console.log(`received move is ${move}`)
-      this.chess.move(move)
+      console.log(`received move is ${moveData}`)
+      move = this.chess.move(moveData)
     } catch (err) {
       console.error(err)
+      return
     }
 
     this.moveNumber += 1
@@ -175,18 +204,24 @@ export class Game {
       return
     }
 
-    socketManager.broadcast(
-      this.gameId,
-      JSON.stringify({
-        type: MOVE, 
-        payload: {
-          move: move,
-          history: this.chess.history(),
-          fen: this.chess.fen(),
-          moveNumber: this.moveNumber
-        }
-      })
-    )
+    this.emitCurrGameState(MOVE)
+
+    // socketManager.broadcast(
+    //   this.gameId,
+    //   JSON.stringify({
+    //     type: MOVE, 
+    //     payload: {
+    //       position: this.chess.fen(),
+    //       turn: this.chess.turn(),
+    //       history: this.chess.history({verbose: true}),
+    //       moveNumber: this.moveNumber,
+    //       inCheck: this.chess.inCheck(),
+    //       status: this.status,
+    //       draggable: true,
+    //       validSquares: this.getValidSquares(),
+    //     }
+    //   })
+    // )
 
     if (this.chess.isGameOver()) {
       this.endGame("COMPLETED")
@@ -221,12 +256,12 @@ export class Game {
       })
     )
   }
-
+ 
   restoreGameState(user: GameUser) {
     socketManager.emitToUser(
       user,
       JSON.stringify({
-        type: JOIN_GAME,
+        type: REJOIN_GAME,
         payload: {
           gameId: this.gameId,
           white: {
@@ -245,16 +280,40 @@ export class Game {
       user,
       JSON.stringify({
         type: USER_RECONNECT,
+        payload: this.getCurrGameState()
+      })
+    )
+
+  }
+
+  rejoinGame(user: GameUser) {
+    socketManager.emitToUser(
+      user,
+      JSON.stringify({
+        type: JOIN_GAME,
         payload: {
-          position: this.chess.fen(),
-          draggable: (this.chess.turn() === "w" && user.id === this.player1UserId) ||  
-                      (this.chess.turn() === "b" && user.id === this.player2UserId),
-          history: this.chess.history({verbose: true}),
-          moveCount: this.moveNumber,
-          status: this.status
+          gameId: this.gameId,
+          white: {
+            username: this.player1Username,
+            id: this.player1UserId
+          },
+          black: {
+            username: this.player2Username,
+            id: this.player2UserId
+          }
         }
       })
     )
+
+
+
+    // socketManager.emitToUser(
+    //   user,
+    //   JSON.stringify({
+    //     type: USER_RECONNECT,
+    //     payload: this.getCurrGameState()
+    //   })
+    // )
     // socketManager.broadcast(
     //   this.gameId,
     //   JSON.stringify({
@@ -270,6 +329,16 @@ export class Game {
     //   })
     // )
 
+  }
+
+  reconnectUser(user: GameUser) {
+    socketManager.emitToUser(
+      user,
+      JSON.stringify({
+        type: USER_RECONNECT,
+        payload: this.getCurrGameState()
+      })
+    )
   }
 
   resign(user: GameUser) {

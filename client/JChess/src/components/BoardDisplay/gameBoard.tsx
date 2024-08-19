@@ -6,28 +6,23 @@ import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { Action } from "./boardDisplay";
 import { ValidSquares } from "./boardDisplay";
 
-import moveSound from "../assets/audio/move-self.mp3";
-import captureSound from "../assets/audio/capture.mp3";
-import castleSound from "../assets/audio/castle.mp3";
-import promoteSound from "../assets/audio/promote.mp3";
-import checkSound from "../assets/audio/move-check.mp3";
+import moveSound from "../../assets/audio/move-self.mp3";
+import captureSound from "../../assets/audio/capture.mp3";
+import castleSound from "../../assets/audio/castle.mp3";
+import promoteSound from "../../assets/audio/promote.mp3";
+import checkSound from "../../assets/audio/move-check.mp3";
 
 export interface GameBoardProps {
   inCheck: boolean,
   validSquares: ValidSquares,
-  // chess: Chess,
   position: string,
   displayPosition: string,
   draggable: boolean,
-  handleMakeMove: (sourceSquare: Square, targetSquare: Square) => Move | undefined,
+  handleMakeMove: (sourceSquare: Square, targetSquare: Square) => ExtendedMove | undefined,
   orientation: BoardOrientation,
   selectedSquare: Square | null,
   dottedSquares: Square[],
   dispatch: React.Dispatch<Action>,
-}
-
-interface ExtendedMove extends Move {
-  inCheck: boolean
 }
 
 export const GameBoard = (props: GameBoardProps) => {
@@ -40,7 +35,7 @@ export const GameBoard = (props: GameBoardProps) => {
   const [playPromoteSound] = useSound(promoteSound)
   const [playCheckSound] = useSound(checkSound)
 
-  const playMoveAudio = (move: ExtendedMove) => {
+  const playMoveAudio = (move: {flags: string, inCheck: boolean}) => {
     if (move.inCheck) {
       playCheckSound()
       return;

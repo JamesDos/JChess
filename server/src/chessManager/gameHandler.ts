@@ -100,8 +100,19 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
     }
     console.log(`rejoining game with gameid ${activeGame.gameId}`)
     // socketManager.addUser(user, activeGame.gameId)
+    // activeGame.rejoinGame(user)
     activeGame.restoreGameState(user)
   })
+
+  // socket.on("reconnect-user", async (data) => {
+  //   console.log("Handle 'reconnect user' triggered");
+  //   const activeGame = gameManager.getAllActiveUserGames(user)
+  //   if (!activeGame) {
+  //     console.log("user not in any games before disconnect!")
+  //     return
+  //   }
+  //   activeGame.reconnectUser(user)
+  // })
 
   socket.on("move", async (data) => {
     console.log("Handler 'move' triggered");
