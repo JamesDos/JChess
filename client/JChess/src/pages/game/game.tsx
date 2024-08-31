@@ -83,7 +83,8 @@ export const Game = () => {
       moveCount: payload.moveNumber,
       inCheck: payload.inCheck,
       validSquares: payload.validSquares,
-      draggable: payload.draggable,
+      // draggable: payload.draggable,
+      draggable: true,
       status: payload.status
     }
     console.log("setting game state")
@@ -153,36 +154,6 @@ export const Game = () => {
     //   socket?.off("message")
     // }
   }, [socket, handleSetGameState])
-
-
-  // useEffect(() => {
-  //   socket.on("move", (move) => {
-  //     console.log(`move is ${move}`)
-  //     makeMove(move)
-  //   })
-  // }, [makeMove])
-
-  // useEffect(() => {
-  //   socket.on("opponent-resign", (message) => {
-  //     setOver(message)
-  //     setDraggable(false)
-  //   })
-  // }, [])
-
-  // useEffect(() => {
-  //   socket.on("player-disconnected", (player) => {
-  //     console.log(`Opponent with id ${player} has disconnected`)
-  //     setOver(`Opponent with id ${player} has disconnected`)
-  //   })
-  // }, [])
-
-  // useEffect(() => {
-  //   socket.on("close-room", ({roomId}) => {
-  //     if (roomId === room) {
-  //       dispatch({type: "cleanup-room"})
-  //     }
-  //   })
-  // }, [dispatch, room])
 
 
   const handleBackToLobby = (e: React.MouseEvent) => {

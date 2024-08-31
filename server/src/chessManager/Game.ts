@@ -261,7 +261,7 @@ export class Game {
     socketManager.emitToUser(
       user,
       JSON.stringify({
-        type: REJOIN_GAME,
+        type: JOIN_GAME,
         payload: {
           gameId: this.gameId,
           white: {

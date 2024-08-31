@@ -74,7 +74,14 @@ const reducer = (state: gameSetupType, action: Action) => {
 
 export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
   const socket = useSocket()
-  const [gameSetUpData, dispatch] = useReducer(reducer, {room: "", orientation:"", players:[]})
+
+  const [gameSetUpData, dispatch] = useReducer(
+    reducer, 
+    {
+      room: "", 
+      orientation: "", 
+      players: []
+    })
   const navigate = useNavigate()
   const { username } = useAuth() 
 

@@ -1,6 +1,6 @@
 import { GameBoard } from "./gameBoard";
 import { MoveDisplay } from "./moveDisplay";
-import { useState, useReducer, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import { Move, Color, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 

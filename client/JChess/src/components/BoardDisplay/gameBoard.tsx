@@ -1,7 +1,6 @@
 import { useSound } from "use-sound";
 import { Chessboard } from "react-chessboard";
-import { Chess, Square, Move } from 'chess.js';
-import { useState } from "react";
+import { Square } from 'chess.js';
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { Action } from "./boardDisplay";
 import { ValidSquares } from "./boardDisplay";
@@ -27,7 +26,6 @@ export interface GameBoardProps {
 
 export const GameBoard = (props: GameBoardProps) => {
   /** Handles all the display logic for ONLY the chessboard */
-
 
   const [playMoveSound] = useSound(moveSound)
   const [playCaptureSound] = useSound(captureSound)
@@ -142,9 +140,12 @@ export const GameBoard = (props: GameBoardProps) => {
     return styles
   }
 
+  console.log(`In gameboard ${props.position}`)
+
   return (
     <Chessboard
-    position={props.draggable ? props.position : props.displayPosition}
+    // position={props.draggable ? props.position : props.displayPosition}
+    position={props.position}
     onPieceDrop={handleDropPiece}
     arePiecesDraggable={props.draggable}
     onPieceClick={handlePieceClick}

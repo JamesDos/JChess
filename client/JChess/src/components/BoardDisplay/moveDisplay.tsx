@@ -1,20 +1,17 @@
 import { useEffect, useCallback } from "react";
-import back1 from "../../assets/images/back1.png";
-import backFull from "../../assets/images/backFull.png";
-import forward1 from "../../assets/images/forward1.png";
-import forwardFull from "../../assets/images/forwardFull.png";
+import back1 from "../../assets/images/backward-step-solid.png";
+import backFull from "../../assets/images/backward-fast-solid.png";
+import forward1 from "../../assets/images/forward-step-solid.png";
+import forwardFull from "../../assets/images/forward-fast-solid.png";
+import flagImg from "../../assets/images/flag-regular.png";
+import handshakeImg from "../../assets/images/handshake-regular.png";
 import { Move } from "chess.js";
 import { Player } from "../../contexts/GameSetUpProvider";
 import { Action } from "../BoardDisplay/boardDisplay";
 
-// import "./moveDisplay.css";
-
 export interface MoveDisplayProps {
   history: Move[],
-  // setBoard: (pos: string) => void,
   selectedMoveNum: number,
-  // setSelectedMoveNum: React.Dispatch<React.SetStateAction<number>>,
-  // resetSquares: () => void,
   players?: Player[],
   dispatch: React.Dispatch<Action>,
 }
@@ -30,9 +27,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
         draggable: halfMoveCount == props.history.length,
       }
     })
-    // props.setBoard(pos)
-    // props.setSelectedMoveNum(halfMoveCount)
-    // props.resetSquares()
   }
 
   const moveForwardOne = useCallback(() => {
@@ -47,9 +41,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
           draggable: props.selectedMoveNum + 1 === props.history.length,
         }
       })
-      // props.setSelectedMoveNum(prevNum => prevNum + 1)
-      // props.setBoard(props.history[props.selectedMoveNum].after)
-      // props.resetSquares()
     }
   }, [props])
 
@@ -63,9 +54,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
           draggable: true,
         }
       })
-      // props.setSelectedMoveNum(props.history.length)
-      // props.setBoard(props.history[props.history.length - 1].after)
-      // props.resetSquares()
     }
   }
 
@@ -79,9 +67,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
           draggable: props.history.length === props.selectedMoveNum - 1,
         }
       })
-      // props.setSelectedMoveNum(prevNum => prevNum - 1)
-      // props.setBoard(props.history[props.selectedMoveNum - 2].after)
-      // props.resetSquares()
     }
   }, [props])
 
@@ -96,9 +81,6 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
             draggable: props.history.length === 1
           }
         })
-      // props.setSelectedMoveNum(1)
-      // props.setBoard(props.history[0].after)
-      // props.resetSquares()
     }
   }
 }
@@ -159,54 +141,72 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   return (
     <div className="flex flex-col bg-light-grey overflow-scroll no-scrollbar h-full">
       <div>
-        Black Player
+        {props.players ? props.players[0].username : "Black"}
       </div>
       <div className="flex items-center w-full h-8 sticky top-0">
-        <ForwardButton 
+        <DisplayButton 
           onClick={moveBackwardsFull}
           imgSrc={backFull}
           alt={"back-full"}
         />
-        <ForwardButton
+        <DisplayButton
           onClick={moveBackwardsOne}
           imgSrc={back1}
           alt={"back-one"}
         />
-        <ForwardButton
+        <DisplayButton
           onClick={moveForwardOne}
           imgSrc={forward1}
           alt={"forward-one"}
         />
-        <ForwardButton
+        <DisplayButton
           onClick={moveForwardFull}
           imgSrc={forwardFull}
           alt={"forward-full"}
         />
       </div>
       {rowItemListElms}
+      <OfferButtons />
       <div>
-        White Player
+        {props.players? props.players[1].username : "White"}
       </div>
     </div>
   )
 }
 
-interface ForwardButtonProps {
+interface DisplayButtonProps {
   onClick: () => void,
   imgSrc: string,
   alt: string
 }
 
-const ForwardButton = (props: ForwardButtonProps) => {
+const DisplayButton = (props: DisplayButtonProps) => {
   return (
     <button
       className="flex justify-center items-center flex-1 hover:bg-green cursor-pointer
-      border-none bg-light-grey"
+      border-none bg-lighter-grey w-full h-full py-1"
       onClick={props.onClick}>
       <img 
         className="max-w-full max-h-full"
         src={props.imgSrc} 
         alt={props.alt} />
     </button>
+  )
+}
+
+const OfferButtons = () => {
+  return (
+    <div className="flex items-center h-8 w-full">
+      <DisplayButton 
+        onClick={() => console.log("clicked offer draw")}
+        imgSrc={handshakeImg}
+        alt={"offer draw"}
+      />
+      <DisplayButton 
+        onClick={() => console.log("clicked offer resign")}
+        imgSrc={flagImg}
+        alt={"resign"}
+      />
+    </div>
   )
 }

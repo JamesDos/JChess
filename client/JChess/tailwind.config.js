@@ -10,6 +10,7 @@ export default {
         "background-black": "#161513",
         "light-grey": "#262422",
         "lighter-grey": "#302e2c",
+        "extra-light-grey": "#BABABA",
         "text-white": "#adadad",
         "orange": "#D64F00",
         "green": "#5d8d25",
