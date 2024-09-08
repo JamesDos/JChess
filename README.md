@@ -36,10 +36,10 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">project_title</h3>
+<h1 align="center">JChess</h1>
 
   <p align="center">
-    project_description
+    Online Multiplayer Chess Website
     <br />
     <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
     <br />
@@ -95,14 +95,18 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
-* [![Next][Next.js]][Next-url]
+* ![TypeScript](https://img.shields.io/badge/TypeScript-black?style=for-the-badge&logo=typescript)
 * [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+* ![Express](https://img.shields.io/badge/express-black?style=for-the-badge&logo=express)
+* ![Node.js](https://img.shields.io/badge/Node.js-green?style=for-the-badge&logo=nodedotjs)
+* ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-blue?style=for-the-badge&logo=tailwindcss)
+* ![MongoDB](https://img.shields.io/badge/MongoDB-black?style=for-the-badge&logo=mongodb&logoColor=%2347A248)
+* ![Socket.IO](https://img.shields.io/badge/Socket.IO-grey?style=for-the-badge&logo=socketdotio&logoColor=%23010101)
+
+
+
+
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
