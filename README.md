@@ -61,22 +61,23 @@
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
+        <li><a href="#screenshots">Screenshots</a></li>
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
-    <li>
+<!--     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
-    </li>
+    </li> -->
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
+<!--     <li><a href="#contributing">Contributing</a></li> -->
+<!--     <li><a href="#license">License</a></li> -->
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+<!--     <li><a href="#acknowledgments">Acknowledgments</a></li> -->
   </ol>
 </details>
 
@@ -85,14 +86,14 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+<!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
 
 Welcome to JChess! Sign up and play chess with others! Gain elo and analyze your games!
 <!--Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `JamesDos`, `JChess`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`-->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Screenshots
+### Screenshots
 <div>
   <img width="1506" alt="Signup" src="https://github.com/user-attachments/assets/c93bb0b0-6ecd-4e20-b3a2-85f7e892a7eb">
 </div>
