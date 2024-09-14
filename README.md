@@ -33,7 +33,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/JamesDos/JChess">
-    <img src="https://github.com/JamesDos/JChess/client/JChess/src/assets/images/wR.png" alt="Logo" width="200" height="200">
+    <img src="https://github.com/JamesDos/JChess/blob/main/client/JChess/src/assets/images/wR.png" alt="Logo" width="200" height="200">
   </a>
 
 <h1 align="center">JChess</h1>
