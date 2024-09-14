@@ -92,7 +92,31 @@ Welcome to JChess! Sign up and play chess with others! Gain elo and analyze your
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Screenshots
+<div>
+  <img width="1506" alt="Signup" src="https://github.com/user-attachments/assets/c93bb0b0-6ecd-4e20-b3a2-85f7e892a7eb">
+</div>
 
+<hr/>
+
+<div>
+  <img width="1506" alt="Login" src="https://github.com/user-attachments/assets/4b9bfd37-463d-401a-9252-487f0d167e86">
+<div/>
+<hr/>
+
+<div>
+  <img width="1506" alt="Home-Select-Game" src="https://github.com/user-attachments/assets/e923d2f9-3c63-47b4-839e-00b91e2af4d4">
+<div/>
+<hr/>
+  
+<div>
+  <img width="1503" alt="Home_Lobby" src="https://github.com/user-attachments/assets/e5ddbd09-f076-473b-91a3-779aeec0e744">
+</div>
+<hr/>
+
+<div>
+  <img width="1506" alt="Game" src="https://github.com/user-attachments/assets/2c71b4ab-5104-4d91-98a9-a3cf148650ab">
+</div>
 
 ### Built With
 
