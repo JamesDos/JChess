@@ -39,7 +39,7 @@
 <h1 align="center">JChess</h1>
 
   <p align="center">
-    Online Multiplayer Chess Website
+    Welcome to JChess! Sign up and play chess with others! Gain elo and analyze your games!
     <br />
     <a href="https://github.com/JamesDos/JChess"><strong>Explore the docs »</strong></a>
     <br />
@@ -88,7 +88,7 @@
 
 <!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
 
-Welcome to JChess! Sign up and play chess with others! Gain elo and analyze your games!
+<!--Welcome to JChess! Sign up and play chess with others! Gain elo and analyze your games!-->
 <!--Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `JamesDos`, `JChess`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`-->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
