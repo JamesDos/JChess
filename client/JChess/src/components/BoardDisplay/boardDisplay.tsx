@@ -151,24 +151,28 @@ export const BoardDisplay = (props: BoardDisplayProps) => {
 
 
   return (
-    <div className="grid grid-cols-2">
-      <GameBoard
-        inCheck={gameState.inCheck}
-        position={gameState.position}
-        displayPosition={gameState.displayPosition}
-        draggable={gameState.draggable}
-        validSquares={gameState.validSquares}
-        handleMakeMove={props.onMove}
-        orientation={gameState.orientation}
-        selectedSquare={gameState.selectedSquare}
-        dottedSquares={gameState.dottedSquares}
-        dispatch={gameStateDispatch}
-      />
-      <MoveDisplay
-        history={gameState.gameHistory}
-        selectedMoveNum={gameState.moveCount}
-        dispatch={gameStateDispatch}
-      />
-    </div>
+    <section className="flex gap-12 justify-center items-center w-full h-full">
+      <div className="w-auto">
+        <GameBoard
+          inCheck={gameState.inCheck}
+          position={gameState.position}
+          displayPosition={gameState.displayPosition}
+          draggable={gameState.draggable}
+          validSquares={gameState.validSquares}
+          handleMakeMove={props.onMove}
+          orientation={gameState.orientation}
+          selectedSquare={gameState.selectedSquare}
+          dottedSquares={gameState.dottedSquares}
+          dispatch={gameStateDispatch}
+        />
+      </div>
+      <div className="w-1/3 h-full">
+        <MoveDisplay
+          history={gameState.gameHistory}
+          selectedMoveNum={gameState.moveCount}
+          dispatch={gameStateDispatch}
+        />
+      </div>
+    </section>
   )
 }

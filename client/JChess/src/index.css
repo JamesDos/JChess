@@ -27,6 +27,7 @@ body {
   body {
     @apply bg-background-black;
     @apply text-text-white;
+    @apply overflow-x-hidden;
   }
 }
 
@@ -34,6 +35,10 @@ body {
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    background: #161513;
   }
 
   .no-scrollbar {

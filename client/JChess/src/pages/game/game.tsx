@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 // import useLocalStorage from "../../hooks/useLocalStorage";
 import { useSocket } from "../../hooks/useSocket";
 import { BoardDisplay } from "../../components/BoardDisplay/boardDisplay";
+import { Chat } from "../../components/chat";
 import './game.css';
 
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
@@ -163,11 +164,11 @@ export const Game = () => {
   }
 
   return (
-    <div className="grid grid-cols-4 h-screen place-items-center">
-      <div className="col-span-1">
-        Hello
+    <div className="flex h-screen w-screen overflow-x-hidden justify-center items-start mt-8 gap-6 px-12">
+      <div className="w-1/4 flex-none h-[80%] pt-8">
+        <Chat />
       </div>
-      <div className="col-span-3 size-5/6">
+      <div className="w-3/4 flex-none pt-8">
         <BoardDisplay
           onMove={onMove}
           orientation={orientation as BoardOrientation}
@@ -176,7 +177,7 @@ export const Game = () => {
         />
       </div>
 
-      <div>
+      {/* <div>
         {players.map(player => player.username)}
       </div>
       {over === "" 
@@ -187,7 +188,7 @@ export const Game = () => {
           {over}
           <button onClick={handleBackToLobby}>Back to Lobby</button>
         </div>
-      }
+      } */}
     </div>
   )
 }

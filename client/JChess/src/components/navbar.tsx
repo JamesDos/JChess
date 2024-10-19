@@ -9,7 +9,7 @@ export const Navbar = () => {
           <img className="size-12" src={wR}/>
           <h1 className="text-2xl">JChess</h1>
         </div>
-        <NavItem to="/lobby" text="Lobby"/>
+        <NavItem to="/" text="Play"/>
         <NavItem to="/analysis" text="Analysis"/>
         <NavItem to="/games" text="Games"/>
         <NavItem to="/profile" text="Profile"/>

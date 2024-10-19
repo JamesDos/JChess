@@ -153,6 +153,7 @@ export const GameBoard = (props: GameBoardProps) => {
     customSquareStyles={determineSquareStyles()}
     onPieceDragBegin={handlePieceDragBegin}
     boardOrientation={props.orientation}
+    boardWidth={580}
     />
   )
 }

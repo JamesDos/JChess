@@ -139,9 +139,14 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
   })
 
   return (
-    <div className="flex flex-col bg-light-grey overflow-scroll no-scrollbar h-full">
-      <div>
-        {props.players ? props.players[0].username : "Black"}
+    <div className="flex flex-col bg-light-grey overflow-scroll no-scrollbar h-full rounded-md">
+      <div className="flex justify-between py-2 px-4">
+        <div>
+          {props.players ? props.players[0].username : "Semajut360"}
+        </div>
+        <div>
+          1500
+        </div>
       </div>
       <div className="flex items-center w-full h-8 sticky top-0">
         <DisplayButton 
@@ -165,10 +170,18 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
           alt={"forward-full"}
         />
       </div>
-      {rowItemListElms}
+      <div className="min-h-64">
+        {rowItemListElms}
+      </div>
+
       <OfferButtons />
-      <div>
-        {props.players? props.players[1].username : "White"}
+      <div className="flex justify-between py-2 px-4">
+        <div>
+          {props.players? props.players[1].username : "Best_Player_321"}
+        </div>
+        <div>
+          1500
+        </div>
       </div>
     </div>
   )

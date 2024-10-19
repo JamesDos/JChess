@@ -15,7 +15,8 @@ export default {
         "orange": "#D64F00",
         "green": "#5d8d25",
         "hover-blue": "#3792e8",
-        "selected-blue": "#283947"
+        "selected-blue": "#283947",
+        "blue": "#5190FF"
       },
       fontFamily: {
         "Noto Sans": ["Noto Sans"]

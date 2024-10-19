@@ -16,7 +16,7 @@ export interface LobbyGameData {
   whiteUsername: string,
 }
 
-export const Lobby = () => {
+export const HomePage = () => {
 
   const socket = useSocket()
   const axiosPrivate = useAxiosPrivate()
@@ -72,12 +72,12 @@ export const Lobby = () => {
   }, [axiosPrivate, socket])
 
   return (
-    <main className="min-h-screen grid place-items-center">
+    <section className="min-h-screen m-0 p-0 grid place-items-center scrollbar">
       <GamesDisplayer
         createGame={createGame}
         joinGame={joinGame}
         gameList={games}
       />
-    </main>
+    </section>
   )
 }

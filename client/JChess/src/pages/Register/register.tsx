@@ -80,10 +80,12 @@ export const Register = () => {
       {success ? (
         <section className="register-success-container">
           <p>Success!</p>
-          <p>{/** Add react router for sign in*/}</p>
+          <Link to="/login">
+            Log In
+          </Link>
         </section>
       ) : (
-      <section className="flex flex-col justify-center h-3/5 w-1/5 bg-light-grey px-10 py-6 rounded-md">
+      <section className="flex flex-col justify-center h-[70%] w-[25%] bg-light-grey px-10 py-6 rounded-md">
         <p className={!errMsg? "err-msg" : "hidden"}>{errMsg}</p>
         <h1 className="flex items-center text-2xl font-bold grow">Sign Up</h1>
         <form className="flex flex-col gap-5 grow" onSubmit={handleSubmit}> 
@@ -95,7 +97,9 @@ export const Register = () => {
               id="register-username"
               autoComplete="off"
               required
-              className="h-30 border-none indent-1 text-black"
+              className={`h-8 bg-light-grey border-solid border-2 
+                focus:outline-none focus:border-blue rounded-md py-4 px-2
+                ${ username ? "border-green" : "border-orange"}`}
               onChange={e => setUsername(e.target.value)}
             />
             <p className={username && !validUsername ? "instructions" : "hidden"}>
@@ -111,7 +115,9 @@ export const Register = () => {
               type="password" 
               id="register-pwd"
               required
-              className="h-30 border-none indent-1 text-black"
+              className={`h-8 bg-light-grey border-solid border-2 
+                focus:outline-none focus:border-blue rounded-md py-4 px-2
+                ${ pwd ? "border-green" : "border-orange"}`}
               onChange={e => setPwd(e.target.value)}
             />
             <p className={pwd && !validPwd ? "instructions" : "hidden"}>
@@ -127,7 +133,9 @@ export const Register = () => {
               type="password" 
               id="register-confirm-pwd"
               required
-              className="h-30 border-none indent-1 text-black"
+              className={`h-8 bg-light-grey border-solid border-2 
+                focus:outline-none focus:border-blue rounded-md py-4 px-2
+                ${ confirmPwd ? "border-green" : "border-orange"}`}
               onChange={e => setConfirmPwd(e.target.value)}
             />
             <p className={!validConfirmPwd? "instructions" : "hidden"}>
@@ -137,7 +145,7 @@ export const Register = () => {
 
           <button
             disabled={(!validUsername || !validPwd || !validConfirmPwd) ? true :  false}
-            className="h-10 border-none rounded-md bg-white text-black my-2"
+            className="h-12 border-none rounded-md bg-blue text-white my-2"
           >Sign Up</button>
 
         </form>

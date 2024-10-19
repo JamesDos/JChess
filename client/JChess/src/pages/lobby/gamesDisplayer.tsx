@@ -17,6 +17,11 @@ export const GamesDisplayer = (props: GamesDisplayerProps) => {
     setActiveDisplay(display)
   }
 
+  const createAndToggleGame = (e: React.MouseEvent) => {
+    props.createGame(e)
+    toggleActiveDisplay(displayStates[0])
+  }
+
   return (
     <section className="flex flex-col h-full w-3/5 mt-4">
       <GamesDisplayerNavbar
@@ -26,7 +31,7 @@ export const GamesDisplayer = (props: GamesDisplayerProps) => {
       { activeDisplay === "create game" 
         ? 
         <CreateGamesDisplay
-          createGame={props.createGame}
+          createGame={createAndToggleGame}
         />
         : 
         <ActiveGamesDisplay 
@@ -104,13 +109,98 @@ interface CreateGamesDisplayProps {
 
 const CreateGamesDisplay = (props: CreateGamesDisplayProps) => {
   return (
-    <div className="flex justify-center items-center grow rounded-lg bg-lighter-grey
-     hover:bg-orange">
-      <button 
+    <div className="grid grid-cols-3 gap-4 grid-rows-4 rounded-lg h-[80%]">
+      <GameTimeControlBtn
+        minutes="1"
+        increment="0"
+        format="Bullet"
         onClick={props.createGame}
-        >
-        Create Game
-      </button>
+      />
+      <GameTimeControlBtn
+        minutes="1"
+        increment="1"
+        format="Bullet"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="3"
+        increment="0"
+        format="Blitz"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="3"
+        increment="2"
+        format="Blitz"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="5"
+        increment="0"
+        format="Blitz"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="5"
+        increment="3"
+        format="Blitz"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="10"
+        increment="0"
+        format="Rapid"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="10"
+        increment="5"
+        format="Rapid"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="15"
+        increment="10"
+        format="Rapid"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="30"
+        increment="0"
+        format="Classical"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="30"
+        increment="20"
+        format="Classical"
+        onClick={props.createGame}
+      />
+      <GameTimeControlBtn
+        minutes="90"
+        increment="30"
+        format="Classical"
+        onClick={props.createGame}
+      />
+    </div>
+  )
+}
+
+interface GameTimeControlBtnProps {
+  minutes: string,
+  increment: string
+  format: string
+  onClick: (e: React.MouseEvent) => void,
+}
+
+const GameTimeControlBtn = (props: GameTimeControlBtnProps) => {
+  return (
+    <div className="flex flex-col justify-center items-center bg-lighter-grey 
+    rounded-lg hover:bg-orange cursor-pointer opacity-50"
+    onClick={props.onClick}
+    >
+      <h1 className="text-2xl">{`${props.minutes} + ${props.increment}`}</h1>
+      <h1 className="text-2xl">{props.format}</h1>
     </div>
   )
 }
