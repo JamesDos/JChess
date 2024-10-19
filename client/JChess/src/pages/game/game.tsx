@@ -112,6 +112,12 @@ export const Game = () => {
 
   // Effects
   useEffect(() => {
+    socket?.on("user-reconnect", (message: string) => {
+      console.log(`rejoin game message is ${message}`)
+      const payload = JSON.parse(message).payload
+      handleSetGameState(payload)
+    })
+
     socket?.on("message", (message: string) => {
       const data = JSON.parse(message)
       console.log(`message received: ${data}`)

@@ -61,6 +61,10 @@ class SocketManager {
     user.socket.send(message)
   }
 
+  emitMessageToUser(user: GameUser, messageName: string, message: string) {
+    user.socket.emit(messageName, message)
+  }
+
   removeUser(userId: string) {
     const roomId = this.userToRoom.get(userId)
     if (!roomId) {

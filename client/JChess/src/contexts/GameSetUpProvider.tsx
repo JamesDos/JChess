@@ -91,6 +91,24 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
       console.log(`no socket in useSocket.`)
       return
     }
+    
+    socket.on("join-game", (message: string) => {
+      console.log(`reconnect message is ${message}`)
+      const payload = JSON.parse(message).payload
+      const players = [{username: payload.white.username}, {username: payload.black.username}]
+      if (payload.white.username === username) {
+        dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
+        console.log("setting white orientation")
+      } else if (payload.black.username === username) {
+        dispatch({type:"join-room", room: payload.gameId, orientation: "black", newPlayers: players})
+        console.log("setting black orientation")
+      } else {
+        console.error("username not in join-game payload!")
+        return
+      }
+      console.log(`players in game are ${players[0].username} ${players[1].username}`)
+      socket.emit("reconnect-user")
+    })
 
     socket.on("message", (message: string) => {
       console.log(`in message ${JSON.parse(message).type}`)
@@ -120,22 +138,22 @@ export const GameSetUpProvider = ({children}: {children: React.ReactNode}) => {
         navigate("/game")
       }
 
-      // if (data.type === "rejoin-game") {
-      //   console.log("in rejoin game")
-      //   const players = [{username: payload.white.username}, {username: payload.black.username}]
-      //   if (payload.white.username === username) {
-      //     dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
-      //     console.log("setting white orientation")
-      //   } else if (payload.black.username === username) {
-      //     dispatch({type:"join-room", room: payload.gameId, orientation: "black", newPlayers: players})
-      //     console.log("setting black orientation")
-      //   } else {
-      //     console.error("username not in join-game payload!")
-      //     return
-      //   }
-      //   console.log(`players in game are ${players[0].username} ${players[1].username}`)
-      //   socket.emit("reconnect-user")
-      // }
+      if (data.type === "rejoin-game") {
+        console.log("in rejoin game")
+        const players = [{username: payload.white.username}, {username: payload.black.username}]
+        if (payload.white.username === username) {
+          dispatch({type:"join-room", room: payload.gameId, orientation: "white", newPlayers: players})
+          console.log("setting white orientation")
+        } else if (payload.black.username === username) {
+          dispatch({type:"join-room", room: payload.gameId, orientation: "black", newPlayers: players})
+          console.log("setting black orientation")
+        } else {
+          console.error("username not in join-game payload!")
+          return
+        }
+        console.log(`players in game are ${players[0].username} ${players[1].username}`)
+        socket.emit("reconnect-user")
+      }
 
       
     })

@@ -287,8 +287,9 @@ export class Game {
   }
 
   rejoinGame(user: GameUser) {
-    socketManager.emitToUser(
+    socketManager.emitMessageToUser(
       user,
+      JOIN_GAME,
       JSON.stringify({
         type: JOIN_GAME,
         payload: {
@@ -305,7 +306,23 @@ export class Game {
       })
     )
 
-
+    // socketManager.emitToUser(
+    //   user,
+    //   JSON.stringify({
+    //     type: JOIN_GAME,
+    //     payload: {
+    //       gameId: this.gameId,
+    //       white: {
+    //         username: this.player1Username,
+    //         id: this.player1UserId
+    //       },
+    //       black: {
+    //         username: this.player2Username,
+    //         id: this.player2UserId
+    //       }
+    //     }
+    //   })
+    // )
 
     // socketManager.emitToUser(
     //   user,
@@ -332,13 +349,21 @@ export class Game {
   }
 
   reconnectUser(user: GameUser) {
-    socketManager.emitToUser(
+    socketManager.emitMessageToUser(
       user,
+      USER_RECONNECT,
       JSON.stringify({
         type: USER_RECONNECT,
         payload: this.getCurrGameState()
       })
     )
+    // socketManager.emitToUser(
+    //   user,
+    //   JSON.stringify({
+    //     type: USER_RECONNECT,
+    //     payload: this.getCurrGameState()
+    //   })
+    // )
   }
 
   resign(user: GameUser) {

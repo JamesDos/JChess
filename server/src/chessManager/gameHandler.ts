@@ -99,20 +99,20 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
       return
     }
     console.log(`rejoining game with gameid ${activeGame.gameId}`)
-    // socketManager.addUser(user, activeGame.gameId)
-    // activeGame.rejoinGame(user)
-    activeGame.restoreGameState(user)
+    socketManager.addUser(user, activeGame.gameId)
+    activeGame.rejoinGame(user)
+    // activeGame.restoreGameState(user)
   })
 
-  // socket.on("reconnect-user", async (data) => {
-  //   console.log("Handle 'reconnect user' triggered");
-  //   const activeGame = gameManager.getAllActiveUserGames(user)
-  //   if (!activeGame) {
-  //     console.log("user not in any games before disconnect!")
-  //     return
-  //   }
-  //   activeGame.reconnectUser(user)
-  // })
+  socket.on("reconnect-user", async (data) => {
+    console.log("Handle 'reconnect user' triggered");
+    const activeGame = gameManager.getAllActiveUserGames(user)
+    if (!activeGame) {
+      console.log("user not in any games before disconnect!")
+      return
+    }
+    activeGame.reconnectUser(user)
+  })
 
   socket.on("move", async (data) => {
     console.log("Handler 'move' triggered");
@@ -140,6 +140,35 @@ const registerGameHandlers = (io: Server, socket: Socket) => {
     game.resign(user)
     gameManager.removeGame(game.gameId)
   })
+
+  socket.on("disconnect", () => {
+    console.log(`User ${decoded.id} disconnected`);
+  
+    // Find the user associated with the socket
+    const user = gameManager.getUser(decoded.id);
+    if (user) {
+      // Find the game the user is part of
+      // const userGames = gameManager.findGamesWithUser(user);
+      // userGames.forEach(game => {
+      //   // Remove the user from the game
+      //   game.removeUser(user);
+      //   console.log(`Removed user ${decoded.id} from game ${game.gameId}`);
+        
+      //   // If the game has no more users, clean up the game
+      //   if (game.isEmpty()) {
+      //     gameManager.removeGame(game.gameId);
+      //     console.log(`Removed empty game ${game.gameId}`);
+      //   }
+      // });
+  
+      // Remove the user from the game manager
+      socketManager.removeUser(decoded.id);
+      // gameManager.removeUser(decoded.id);
+      console.log(`Removed user ${decoded.id} from game manager`);
+    } else {
+      console.error(`User ${decoded.id} not found in game manager`);
+    }
+  });
 
 
 };
