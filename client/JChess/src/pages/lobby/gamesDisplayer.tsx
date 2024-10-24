@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LobbyGameData } from "./lobby";
+import { motion } from "framer-motion";
 
 export interface GamesDisplayerProps {
   createGame: (e: React.MouseEvent) => void,
@@ -51,17 +52,49 @@ interface GamesDisplayerNavbarProps {
 const GamesDisplayerNavbar = (props: GamesDisplayerNavbarProps) => {
   return (
     <ul className="list-none flex justify-between bg-background-black">
-      <li 
+      <motion.li 
         className="flex justify-center grow border-transparent border-b-2 
         hover:border-orange py-2 cursor-pointer"
-        onClick={() => props.toggle(props.displayStates[0])}>
-        Create Game
-      </li>
-      <li className="flex justify-center grow border-transparent border-b-2
+        onClick={() => props.toggle(props.displayStates[0])} 
+        style={{
+          background: "linear-gradient(90deg, #D64F00 0%, #D64F00 50%, #fffcf0 50%, #fffcf0 100%)", // Gradient color to simulate the fill
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          color: "transparent",
+          backgroundSize: "200% 100%", // Double width for transition effect
+          backgroundPosition: "100% 0",
+          transition: "background-position 0.5s ease", // Smooth transition of the fill
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundPosition = "0 0"; // Start from left
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundPosition = "100% 0"; // Reset to right
+        }}
+      >
+          Create Game
+      </motion.li>
+      <motion.li className="flex justify-center grow border-transparent border-b-2
         hover:border-orange py-2 cursor-pointer"
-        onClick={() => props.toggle(props.displayStates[1])}>
+        onClick={() => props.toggle(props.displayStates[1])}
+        style={{
+          background: "linear-gradient(90deg, #D64F00 0%, #D64F00 50%, #fffcf0 50%, #fffcf0 100%)", // Gradient color to simulate the fill
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          color: "transparent",
+          backgroundSize: "200% 100%", // Double width for transition effect
+          backgroundPosition: "100% 0",
+          transition: "background-position 0.5s ease", // Smooth transition of the fill
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundPosition = "0 0"; // Start from left
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundPosition = "100% 0"; // Reset to right
+        }}
+      >
         Lobby
-      </li>
+      </motion.li>
     </ul>
   )
 }
@@ -195,12 +228,15 @@ interface GameTimeControlBtnProps {
 
 const GameTimeControlBtn = (props: GameTimeControlBtnProps) => {
   return (
-    <div className="flex flex-col justify-center items-center bg-lighter-grey 
-    rounded-lg hover:bg-orange cursor-pointer opacity-50"
-    onClick={props.onClick}
+    <motion.div 
+      className="flex flex-col justify-center items-center bg-lighter-grey 
+      rounded-lg hover:bg-orange cursor-pointer opacity-50"
+      onClick={props.onClick}
+      whileHover={{ scale: 1.05 }}
+      transition={{ duration: 0.2 }}
     >
       <h1 className="text-2xl">{`${props.minutes} + ${props.increment}`}</h1>
       <h1 className="text-2xl">{props.format}</h1>
-    </div>
+    </motion.div>
   )
 }

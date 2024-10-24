@@ -1,5 +1,5 @@
 import { useState } from "react";
-// import useGameSetUp from "../hooks/useGameSetUp";
+import useGameSetUp from "../hooks/useGameSetUp";
 
 export interface MessageLine {
   user: string,
@@ -13,12 +13,11 @@ export interface ChatProps {
 
 export const Chat = () => {
 
-  // const { players, orientation } = useGameSetUp()
+  const { players, orientation } = useGameSetUp()
 
-  // const username = orientation === "white" ? players[0].username : players[1].username
+  const username = orientation === "white" ? players[0].username : players[1].username
 
-  const username = "Semajut360"
-
+  // const username = "Semajut360"
 
   const [message, setMessage] = useState("")
   const [messages, setMessages] = useState<MessageLine[]>([])
@@ -68,8 +67,6 @@ export const Chat = () => {
               />
         </form>
       </div>
-      
-
     </section>
   )
 }

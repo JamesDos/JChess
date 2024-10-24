@@ -140,7 +140,7 @@ export const GameBoard = (props: GameBoardProps) => {
     return styles
   }
 
-  console.log(`In gameboard ${props.position}`)
+  console.log(`In gameboard ${props.orientation}`)
 
   return (
     <Chessboard

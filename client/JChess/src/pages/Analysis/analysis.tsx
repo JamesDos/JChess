@@ -43,6 +43,7 @@ export const AnalysisPage = () => {
   const [orientation, setOrientation] = useState<BoardOrientation>("white")
 
   const toggleOrientation = () => {
+    console.log("toggling orientation")
     setOrientation(prev => prev === "white" ? "black" : "white")
   }
 
@@ -91,17 +92,25 @@ export const AnalysisPage = () => {
     }
   }
 
+  console.log("orientation is ", orientation)
+
   return (
-    <main>
-      <div className="col-span-1">
-        <button onClick={toggleOrientation}>Flip Board</button>
+    <main className="flex h-screen w-screen overflow-x-hidden justify-center items-start mt-8 gap-6 px-12">
+      <div className="flex w-[1/4] flex-none h-[10%] pt-8">
+        <button 
+          className="bg-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={toggleOrientation}
+        >
+        Flip Board</button>
       </div>
-      <BoardDisplay
-        onMove={onMove}
-        recentMove={recentMove}
-        orientation={orientation}
-        validSquares={validSquares}
-      />
+      <div className="w-3/4 flex-none pt-8">
+        <BoardDisplay
+          onMove={onMove}
+          recentMove={recentMove}
+          orientation={orientation}
+          validSquares={validSquares}
+        />
+      </div>
     </main>
   )
 }

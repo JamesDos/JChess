@@ -81,6 +81,7 @@ export type Action =
 | {type: "update-game-state", payload: GameStatePayload}
 | {type: "update-display-pos", payload: DisplayPosPayload}
 | {type: "update-highlighted-squares", payload: HighlightedSquaresPayload}
+| {type: "update-orientation", payload: BoardOrientation}
 
 
 const reducer = (state: GameStateType, action: Action): GameStateType => {
@@ -115,6 +116,11 @@ const reducer = (state: GameStateType, action: Action): GameStateType => {
         dottedSquares: action.payload.newDottedSquares
       }
     }
+    case "update-orientation":
+      return {
+        ...state,
+        orientation: action.payload
+      };
 
     default:
       throw new Error("Unknown dispatch action type!")
@@ -126,6 +132,7 @@ export interface BoardDisplayProps {
   recentMove: GameStatePayload | null,
   validSquares: ValidSquares
   onMove: (sourceSquare: Square, targetSquare: Square) => {flags: string, inCheck: boolean} | undefined
+  players?: {username: string}[]
 }
 
 export const BoardDisplay = (props: BoardDisplayProps) => {
@@ -147,8 +154,12 @@ export const BoardDisplay = (props: BoardDisplayProps) => {
     }
   }, [props.recentMove])
 
-
-
+  useEffect(() => {
+    gameStateDispatch({
+      type: "update-orientation",
+      payload: props.orientation
+    });
+  }, [props.orientation]);
 
   return (
     <section className="flex gap-12 justify-center items-center w-full h-full">
@@ -171,6 +182,8 @@ export const BoardDisplay = (props: BoardDisplayProps) => {
           history={gameState.gameHistory}
           selectedMoveNum={gameState.moveCount}
           dispatch={gameStateDispatch}
+          players={props.players}
+          orientation={gameState.orientation}
         />
       </div>
     </section>

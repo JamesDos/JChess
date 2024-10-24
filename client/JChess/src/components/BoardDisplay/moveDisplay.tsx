@@ -14,9 +14,13 @@ export interface MoveDisplayProps {
   selectedMoveNum: number,
   players?: Player[],
   dispatch: React.Dispatch<Action>,
+  orientation: string,
 }
 
 export const MoveDisplay = (props: MoveDisplayProps) => {
+
+  const whitePlayerUsername = props.players?.[0].username
+  const blackPlayerUsername = props.players?.[1].username
 
   const handleClickMove = (pos: string, halfMoveCount: number) => {
     props.dispatch({
@@ -142,10 +146,10 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
     <div className="flex flex-col bg-light-grey overflow-scroll no-scrollbar h-full rounded-md">
       <div className="flex justify-between py-2 px-4">
         <div>
-          {props.players ? props.players[0].username : "Semajut360"}
+          {props.players ? (props.orientation === "black" ? whitePlayerUsername : blackPlayerUsername ) : ""}
         </div>
         <div>
-          1500
+          {props.players ? "1500" : ""}
         </div>
       </div>
       <div className="flex items-center w-full h-8 sticky top-0">
@@ -177,10 +181,10 @@ export const MoveDisplay = (props: MoveDisplayProps) => {
       <OfferButtons />
       <div className="flex justify-between py-2 px-4">
         <div>
-          {props.players? props.players[1].username : "Best_Player_321"}
+          {props.players ? (props.orientation === "white" ? whitePlayerUsername : blackPlayerUsername ) : ""}
         </div>
         <div>
-          1500
+          {props.players ? "1500" : ""}
         </div>
       </div>
     </div>

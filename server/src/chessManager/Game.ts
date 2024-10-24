@@ -22,7 +22,6 @@ interface ValidSquares {
 }
 
 export class Game {
-
   public gameId: string
   public player1UserId: string // player 1 is white
   public player2UserId: string | null // player 2 is black
@@ -33,6 +32,7 @@ export class Game {
   public status: GameStatus
   public result: GameResult | null
   private moveNumber: number
+  private chat: string[]
 
   constructor(player1UserId: string, player1Username: string) {
     this.player1UserId = player1UserId
@@ -45,6 +45,7 @@ export class Game {
     this.status = "PENDING"
     this.result = null
     this.moveNumber = 0
+    this.chat = []
   }
 
   async addPlayer2(player2UserId: string) {
